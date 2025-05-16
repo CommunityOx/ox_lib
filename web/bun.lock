@@ -21,7 +21,7 @@
         "react": "18.2.0",
         "react-dom": "18.2.0",
         "react-hook-form": "^7.41.3",
-        "react-hot-toast": "^2.4.0",
+        "react-hot-toast": "^2.5.2",
         "react-markdown": "^8.0.1",
         "remark-gfm": "^3.0.1",
         "tinycolor2": "^1.6.0",
@@ -45,6 +45,9 @@
         "rimraf": "^3.0.2",
       },
     },
+  },
+  "patchedDependencies": {
+    "react-hot-toast@2.5.2": "patches/react-hot-toast@2.5.2.patch",
   },
   "packages": {
     "@ampproject/remapping": ["@ampproject/remapping@2.3.0", "", { "dependencies": { "@jridgewell/gen-mapping": "^0.3.5", "@jridgewell/trace-mapping": "^0.3.24" } }, "sha512-30iZtAPgz+LTIYoeivqYo853f02jBYSd5uGnGpkFV0M3xOt9aN73erkgYAmZU43x4VfqcnLxW9Kpg3R5LC4YYw=="],

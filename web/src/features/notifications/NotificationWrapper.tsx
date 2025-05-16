@@ -138,7 +138,7 @@ const Notifications: React.FC = () => {
     } else {
       iconColor = tinycolor(data.iconColor).toRgbString();
     }
-    
+
     toast.custom(
       (t) => (
         <Box
