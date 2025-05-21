@@ -39,7 +39,7 @@ function timer:constructor(time, onEnd, async)
     self.private.currentTimeLeft = time
     self.private.startTime = 0
     self.private.paused = false
-    self.private.triggerOnEnd = true
+    self.private.triggerOnEnd = onEnd and true or false
 
     self:start(async)
 end
@@ -53,8 +53,6 @@ function timer:run()
     if self.private.triggerOnEnd then
         self:onEnd()
     end
-
-    self.private.triggerOnEnd = true
 end
 
 function timer:start(async)
@@ -142,7 +140,7 @@ function timer:getTimeLeft(format)
 end
 
 ---@param time number
----@param onEnd fun(self: OxTimer)
+---@param onEnd fun(self: OxTimer) | nil
 ---@param async? boolean
 function lib.timer(time, onEnd, async)
     return timer:new(time, onEnd, async)
