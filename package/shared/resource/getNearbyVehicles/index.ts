@@ -1,5 +1,5 @@
 import { cache } from '../cache/index';
-import { context } from 'shared';
+import { context } from '../../index';
 import { Vector3 } from "@nativewrappers/client";
 
 interface NearbyVehicle {
