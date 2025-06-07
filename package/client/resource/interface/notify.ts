@@ -10,7 +10,7 @@ type NotificationPosition =
   | 'bottom-left'
   | 'center-right'
   | 'center-left';
-type NotificationType = 'inform' | 'error' | 'success';
+type NotificationType = 'inform' | 'error' | 'success' | 'warning';
 type IconAnimation = 'spin' | 'spinPulse' | 'spinReverse' | 'pulse' | 'beat' | 'fade' | 'beatFade' | 'bounce' | 'shake';
 
 interface NotifyProps {
