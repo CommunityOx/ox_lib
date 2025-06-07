@@ -60,7 +60,7 @@ end
 function lib.addKeybind(data)
     ---@cast data CKeybind
     
-    if(data.defaultMapper == "MOUSE_WHEEL")then
+    if(string.upper(data.defaultMapper) == "MOUSE_WHEEL")then
         data.hash = joaat(data.name) | 0x80000000
         keybinds[data.name] = setmetatable(data, keybind_mt)
 
