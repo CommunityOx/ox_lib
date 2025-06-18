@@ -1,6 +1,6 @@
 import { cache } from '../cache/index';
 import { context } from '../../index';
-import { Vector3 } from "@nativewrappers/client";
+import { Vector3 } from "@nativewrappers/fivem";
 
 interface NearbyVehicle {
     vehicle: number;
