@@ -349,7 +349,7 @@ function lib.setVehicleProperties(vehicle, props, fixVehicle)
     if props.color1 then
         if type(props.color1) == 'number' then
             ClearVehicleCustomPrimaryColour(vehicle)
-            SetVehicleColours(vehicle, props.color1 --[[@as number]], colorSecondary --[[@as number]])
+            SetVehicleColours(vehicle, props.color1 --[[@as number]], type(colorSecondary) == "number" and colorSecondary or 0 --[[@as number]])
         else
             if props.paintType1 then SetVehicleModColor_1(vehicle, props.paintType1, 0, props.pearlescentColor or 0) end
 
@@ -360,7 +360,9 @@ function lib.setVehicleProperties(vehicle, props, fixVehicle)
     if props.color2 then
         if type(props.color2) == 'number' then
             ClearVehicleCustomSecondaryColour(vehicle)
-            SetVehicleColours(vehicle, props.color1 or colorPrimary --[[@as number]], props.color2 --[[@as number]])
+
+            local primaryColour = props.color1 or colorPrimary
+            SetVehicleColours(vehicle, type(primaryColour) == "number" and primaryColour or 0 --[[@as number]], props.color2 --[[@as number]])
         else
             if props.paintType2 then SetVehicleModColor_2(vehicle, props.paintType2, 0) end
 
