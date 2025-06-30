@@ -150,7 +150,8 @@ local function startProgress(data)
     end
 
     playerState.invBusy = false
-    local duration = progress ~= false and GetGameTimer() - startTime + 100 -- give slight leeway
+    local timeOffset = (data.duration / 1000) * 20 -- try to match NUI duration with the game timer as quick fix
+    local duration = progress ~= false and (GetGameTimer() - startTime + timeOffset) or 0
 
     if progress == false or duration <= data.duration then
         SendNUIMessage({ action = 'progressCancel' })
