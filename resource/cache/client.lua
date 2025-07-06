@@ -29,6 +29,12 @@ local GetCurrentPedWeapon = GetCurrentPedWeapon
 CreateThread(function()
 	while true do
 		local ped = PlayerPedId()
+
+		-- If the player's ped is changed, the ped value may return 0 during the transition. If the value is 0, skip all checks.
+		if ped == 0 then
+			goto continue
+		end
+
 		cache:set('ped', ped)
 
 		local vehicle = GetVehiclePedIsIn(ped, false)
@@ -60,8 +66,9 @@ CreateThread(function()
 		end
 
 		local hasWeapon, currentWeapon = GetCurrentPedWeapon(ped, true)
+		cache:set('weapon', (hasWeapon and currentWeapon > 0) and currentWeapon or false)
 
-		cache:set('weapon', hasWeapon and currentWeapon or false)
+		:: continue ::
 
 		Wait(100)
 	end
