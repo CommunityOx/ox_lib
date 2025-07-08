@@ -31,44 +31,39 @@ CreateThread(function()
 		local ped = PlayerPedId()
 
 		-- If the player's ped is changed, the ped value may return 0 during the transition. If the value is 0, skip all checks.
-		if ped == 0 then
-			goto continue
-		end
+		if ped ~= 0 then
+			cache:set('ped', ped)
 
-		cache:set('ped', ped)
+			local vehicle = GetVehiclePedIsIn(ped, false)
 
-		local vehicle = GetVehiclePedIsIn(ped, false)
+			if vehicle > 0 then
+				if vehicle ~= cache.vehicle then
+					cache:set('seat', false)
+				end
 
-		if vehicle > 0 then
-			if vehicle ~= cache.vehicle then
+				cache:set('vehicle', vehicle)
+
+				if not cache.seat or GetPedInVehicleSeat(vehicle, cache.seat) ~= ped then
+					for i = -1, GetVehicleMaxNumberOfPassengers(vehicle) - 1 do
+						if GetPedInVehicleSeat(vehicle, i) == ped then
+							break
+						end
+					end
+				end
+			else
+				cache:set('vehicle', false)
 				cache:set('seat', false)
 			end
 
-			cache:set('vehicle', vehicle)
-
-			if not cache.seat or GetPedInVehicleSeat(vehicle, cache.seat) ~= ped then
-				for i = -1, GetVehicleMaxNumberOfPassengers(vehicle) - 1 do
-					if GetPedInVehicleSeat(vehicle, i) == ped then
-						cache:set('seat', i)
-						break
-					end
-				end
+			if cache.game == 'redm' then
+				local mount = GetMount(ped)
+				local onMount = IsPedOnMount(ped)
+				cache:set('mount', onMount and mount or false)
 			end
-		else
-			cache:set('vehicle', false)
-			cache:set('seat', false)
+
+			local hasWeapon, currentWeapon = GetCurrentPedWeapon(ped, true)
+			cache:set('weapon', (hasWeapon and currentWeapon > 0) and currentWeapon or false)
 		end
-
-		if cache.game == 'redm' then
-			local mount = GetMount(ped)
-			local onMount = IsPedOnMount(ped)
-			cache:set('mount', onMount and mount or false)
-		end
-
-		local hasWeapon, currentWeapon = GetCurrentPedWeapon(ped, true)
-		cache:set('weapon', (hasWeapon and currentWeapon > 0) and currentWeapon or false)
-
-		:: continue ::
 
 		Wait(100)
 	end
