@@ -46,6 +46,7 @@ CreateThread(function()
 				if not cache.seat or GetPedInVehicleSeat(vehicle, cache.seat) ~= ped then
 					for i = -1, GetVehicleMaxNumberOfPassengers(vehicle) - 1 do
 						if GetPedInVehicleSeat(vehicle, i) == ped then
+							cache:set('seat', i)
 							break
 						end
 					end
