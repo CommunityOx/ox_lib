@@ -76,4 +76,6 @@ export interface ITextarea extends BaseField<'textarea', string> {
   autosize?: boolean;
   min?: number;
   max?: number;
+  minLength?: number;
+  maxLength?: number;
 }
