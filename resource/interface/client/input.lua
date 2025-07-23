@@ -30,6 +30,8 @@ local input
 ---@field searchable? boolean
 ---@field description? string
 ---@field maxSelectedValues? number
+---@field minLength? number
+---@field maxLength? number
 
 ---@class InputDialogOptionsProps
 ---@field allowCancel? boolean
