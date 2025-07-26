@@ -22,7 +22,7 @@ interface NotifyProps {
   position?: NotificationPosition;
   type?: NotificationType;
   style?: Sx;
-  icon?: IconName | [IconPrefix, IconName];
+  icon?: IconName | [IconPrefix, IconName] | false;
   iconColor?: string;
   iconAnimation?: IconAnimation;
   alignIcon?: 'top' | 'center';
