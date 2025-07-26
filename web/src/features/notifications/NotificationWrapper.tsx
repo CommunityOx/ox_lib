@@ -103,7 +103,7 @@ const Notifications: React.FC = () => {
         break;
     }
 
-    if (!data.icon) {
+    if (data.icon == undefined) {
       switch (data.type) {
         case 'error':
           data.icon = 'circle-xmark';
