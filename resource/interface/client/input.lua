@@ -35,6 +35,7 @@ local input
 
 ---@class InputDialogOptionsProps
 ---@field allowCancel? boolean
+---@field size? 'xs' | 'sm' | 'md' | 'lg' | 'xl'
 
 ---@param heading string
 ---@param rows string[] | InputDialogRowProps[]
