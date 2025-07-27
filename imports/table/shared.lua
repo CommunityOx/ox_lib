@@ -123,11 +123,24 @@ local function shuffle(tbl)
     return tbl
 end
 
+
+---@param tbl table
+---@param fn function(value: any, key: any): any
+---@return table
+local function map(tbl, fn)
+    local result = {}
+    for k, v in pairs(tbl) do
+        result[k] = fn(v, k)
+    end
+    return result
+end
+
 table.contains = contains
 table.matches = table_matches
 table.deepclone = table_deepclone
 table.merge = table_merge
 table.shuffle = shuffle
+table.map = map
 
 local frozenNewIndex = function(self) error(('cannot set values on a frozen table (%s)'):format(self), 2) end
 local _rawset = rawset
