@@ -93,9 +93,11 @@ CreateThread(function()
                 nearbyCount += 1
                 nearbyPoints[nearbyCount] = point
 
-                if point.onEnter and not point.inside then
+                if not point.inside then
                     point.inside = true
-                    point:onEnter()
+                    if point.onEnter then
+                        point:onEnter()
+                    end
                 end
             elseif point.currentDistance then
                 if point.onExit then point:onExit() end
