@@ -39,10 +39,14 @@ local function removePoint(self)
     points[self.id] = nil
 end
 
+local function hasRemovePoint(entry)
+    return entry.remove == removePoint
+end
+
 CreateThread(function()
     while true do
         local coords = GetEntityCoords(cache.ped)
-        local newPoints = lib.grid.getNearbyEntries(coords, function(entry) return entry.remove == removePoint end) --[[@as CPoint[] ]]
+        local newPoints = lib.grid.getNearbyEntries(coords, hasRemovePoint) --[[@as CPoint[] ]]
         local cellX, cellY = lib.grid.getCellPosition(coords)
         cache.coords = coords
         closestPoint = nil
