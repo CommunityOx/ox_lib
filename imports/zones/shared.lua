@@ -341,6 +341,8 @@ end
 ---@return CZone
 local function setZone(data)
     ---@cast data CZone
+    local coords = cache.coords or GetEntityCoords(cache.ped)
+    data.distance = #(data.coords - coords)
     data.remove = removeZone
     data.contains = data.contains or contains
 
