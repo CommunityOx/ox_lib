@@ -94,6 +94,7 @@ end
 
 if service == 'fivemanage' then
     local key = GetConvar('fivemanage:key', '')
+    local dataset = GetConvar('fivemanage:dataset', 'default')
 
     if key ~= '' then
         local endpoint = 'https://api.fivemanage.com/api/logs/batch'
@@ -101,7 +102,8 @@ if service == 'fivemanage' then
         local headers = {
             ['Content-Type'] = 'application/json',
             ['Authorization'] = key,
-            ['User-Agent'] = 'ox_lib'
+            ['User-Agent'] = 'ox_lib',
+            ['X-Fivemanage-Dataset'] = dataset,
         }
 
         function lib.logger(source, event, message, ...)
