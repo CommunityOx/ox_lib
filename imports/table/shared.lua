@@ -49,6 +49,10 @@ end
 local function table_matches(t1, t2)
     local tabletype1 = table.type(t1)
 
+    if next(t1) == nil and next(t2) == nil then 
+        return true 
+    end
+
     if not tabletype1 then return t1 == t2 end
 
     if tabletype1 ~= table.type(t2) or (tabletype1 == 'array' and #t1 ~= #t2) then
