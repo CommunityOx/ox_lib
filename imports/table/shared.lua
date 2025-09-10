@@ -52,10 +52,6 @@ local function table_matches(t1, t2)
 	if type1 ~= type2 then return false end
 	if type1 ~= 'table' and type2 ~= 'table' then return t1 == t2 end
 
-    if tabletype1 ~= table.type(t2) or (tabletype1 == 'array' and #t1 ~= #t2) then
-        return false
-    end
-
     for k, v1 in pairs(t1) do
         local v2 = t2[k]
         if v2 == nil or not table_matches(v1, v2) then
