@@ -92,6 +92,7 @@ if cache.game == 'redm' then return end
 ---@field windows? number[]
 ---@field doors? number[]
 ---@field tyres? table<number | string, 1 | 2>
+---@field brokenTyres? table<number | string, boolean>
 ---@field bulletProofTyres? boolean
 ---@field driftTyres? boolean
 
@@ -164,6 +165,7 @@ function lib.getVehicleProperties(vehicle)
             windows = {},
             doors = {},
             tyres = {},
+            brokenTyres = {},
         }
 
         local windows = 0
@@ -189,6 +191,13 @@ function lib.getVehicleProperties(vehicle)
         for i = 0, 7 do
             if IsVehicleTyreBurst(vehicle, i, false) then
                 damage.tyres[i] = IsVehicleTyreBurst(vehicle, i, true) and 2 or 1
+            end
+        end
+
+        -- Check for broken off wheels
+        for i = 0, 7 do
+            if IsVehicleWheelBrokenOff(vehicle, i) then
+                damage.brokenTyres[i] = true
             end
         end
 
@@ -282,6 +291,7 @@ function lib.getVehicleProperties(vehicle)
             windows = damage.windows,
             doors = damage.doors,
             tyres = damage.tyres,
+            brokenTyres = damage.brokenTyres,
             bulletProofTyres = GetVehicleTyresCanBurst(vehicle),
             driftTyres = gameBuild >= 2372 and GetDriftTyresEnabled(vehicle),
             -- no setters?
@@ -417,6 +427,14 @@ function lib.setVehicleProperties(vehicle, props, fixVehicle)
     if props.tyres then
         for tyre, state in pairs(props.tyres) do
             SetVehicleTyreBurst(vehicle, tonumber(tyre) --[[@as number]], state == 2, 1000.0)
+        end
+    end
+
+    if props.brokenTyres then
+        for tyre, isBroken in pairs(props.brokenTyres) do
+            if isBroken then
+                BreakOffVehicleWheel(vehicle, tonumber(tyre) --[[@as number]], false, false, false, false)
+            end
         end
     end
 
