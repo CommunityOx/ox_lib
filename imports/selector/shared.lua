@@ -12,7 +12,7 @@ local deepClone = lib.table.deepclone
 ---@param sets OxSelectorSet | table<string, OxSelectorItem[]>
 function OxSelector:constructor(sets)
     if type(sets) ~= "table" then
-        error("Invalid sets provided to OxSelector constructor")
+        lib.print.error("Invalid sets provided to OxSelector constructor")
     end
 
     if lib.table.type(sets) == "array" then
@@ -36,32 +36,32 @@ function OxSelector:constructor(sets)
 
             assert(type(weight) == "number" and weight >= 0, "weight must be a non-negative number")
 
-            self.totalWeights[setName] += weight
+            self.private.totalWeights[setName] += weight
         end
     end
 
-    self.sets = sets
+    self.private.sets = sets
 end
 
 --- Get a random non-weighted item from a specific set
 ---@param setName? string
 ---@return OxSelectorItem?
 function OxSelector:getRandom(setName)
-    local set = (setName and self.sets[setName]) or self.sets[DEFAULT_SET]
+    local set = (setName and self.private.sets[setName]) or self.private.sets[DEFAULT_SET]
     if not set then return nil end
-    local item = deepClone(set[math.random(#set)])
+    local item = set[math.random(#set)][2]
 
-    return item
+    return type(item) == "table" and deepClone(item) or item
 end
 
 --- Get a random weighted item from a specific set
 ---@param setName? string
 ---@return OxSelectorItem?
 function OxSelector:getRandomWeighted(setName)
-    local set = (setName and self.sets[setName]) or self.sets[DEFAULT_SET]
+    local set = (setName and self.private.sets[setName]) or self.private.sets[DEFAULT_SET]
     if not set then return nil end
 
-    local totalWeight = self.totalWeights[setName or DEFAULT_SET]
+    local totalWeight = self.private.totalWeights[setName or DEFAULT_SET]
     if totalWeight == 0 then return nil end
 
     local randomWeight = math.random() * totalWeight
@@ -70,13 +70,15 @@ function OxSelector:getRandomWeighted(setName)
     for i = 1, #set do
         cumulativeWeight = cumulativeWeight + set[i][1]
         if randomWeight <= cumulativeWeight then
-            return deepClone(set[i])
+            local item = set[i][2]
+            return type(item) == "table" and deepClone(item) or item
         end
     end
 
     return nil
 end
 
+--- get multiple non-weighted random items from a specific set
 ---@param setName? string
 ---@param count number
 ---@return OxSelectorItem[]
@@ -92,6 +94,7 @@ function OxSelector:getRandomAmount(setName, count)
     return items
 end
 
+--- get multiple weighted random items from a specific set
 ---@param setName? string
 ---@param count number
 ---@return OxSelectorItem[]
@@ -107,17 +110,20 @@ function OxSelector:getRandomWeightedAmount(setName, count)
     return items
 end
 
+--- get all items from a specific set
 ---@param setName? string
 ---@return OxSelectorItem[]
-function OxSelector:getAllFromSet(setName)
+function OxSelector:getSet(setName)
     return deepClone((setName and self.private.sets[setName]) or self.private.sets[DEFAULT_SET])
 end
 
+--- get all sets
 ---@return table<string, OxSelectorItem[]>
 function OxSelector:getAllSets()
     return deepClone(self.private.sets)
 end
 
+--- add a new set
 ---@param setName string
 ---@param items OxSelectorItem[]
 function OxSelector:addSet(setName, items)
@@ -133,6 +139,7 @@ function OxSelector:addSet(setName, items)
     self.private.sets[setName] = items
 end
 
+--- update an existing set
 ---@param setName string
 ---@param newItems OxSelectorItem[]
 function OxSelector:updateSet(setName, newItems)
@@ -148,6 +155,7 @@ function OxSelector:updateSet(setName, newItems)
     self.private.sets[setName] = newItems
 end
 
+--- remove a set
 ---@param setName string
 function OxSelector:removeSet(setName)
     assert(type(setName) == "string", "setName must be a string")
