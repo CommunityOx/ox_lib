@@ -11,7 +11,7 @@ interface AlertDialogProps {
   };
 }
 
-type alertDialog = (data: AlertDialogProps) => Promise<'cancel' | 'confirm'>;
+type alertDialog = (data: AlertDialogProps) => Promise<'cancel' | 'confirm' | 'timeout' | undefined>;
 
 export const alertDialog: alertDialog = async (data, timeout?: number) =>
   await exports.ox_lib.alertDialog(data, timeout);

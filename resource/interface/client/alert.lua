@@ -21,7 +21,7 @@ local alertId = 0
 
 ---@param data AlertDialogProps
 ---@param timeout? number Force the window to timeout after `x` milliseconds.
----@return 'cancel' | 'confirm' | nil
+---@return 'cancel' | 'confirm' | 'timeout' | nil
 function lib.alertDialog(data, timeout)
     if alert then return end
 
@@ -53,10 +53,10 @@ function lib.closeAlertDialog(reason)
         action = 'closeAlertDialog'
     })
 
-    local p = alert
+    local _alert = alert
     alert = nil
 
-    if reason then p:reject(reason) else p:resolve() end
+    _alert:resolve(reason)
 end
 
 RegisterNUICallback('closeAlert', function(data, cb)
