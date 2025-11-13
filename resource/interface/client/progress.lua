@@ -58,6 +58,7 @@ local function interruptProgress(data)
 end
 
 local isFivem = cache.game == 'fivem'
+local isRedm = cache.game == 'redm'
 
 local controls = {
     INPUT_LOOK_LR = isFivem and 1 or 0xA987235F,
@@ -226,6 +227,19 @@ end)
 if isFivem then
     RegisterKeyMapping('cancelprogress', locale('cancel_progress'), 'keyboard', 'x')
 end
+
+if isRedM then
+    CreateThread(function()
+        while true do
+            Wait(100)
+            if lib.progressActive() and IsControlPressed(0, 0x8CC9CD42) then
+                ExecuteCommand('cancelprogress')
+                Wait(500)
+            end
+        end
+    end)
+end
+
 
 local function deleteProgressProps(serverId)
     local playerProps = createdProps[serverId]
