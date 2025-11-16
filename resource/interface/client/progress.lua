@@ -228,7 +228,7 @@ if isFivem then
     RegisterKeyMapping('cancelprogress', locale('cancel_progress'), 'keyboard', 'x')
 end
 
-if isRedM then
+if isRedm then
     CreateThread(function()
         while true do
             Wait(100)
@@ -239,7 +239,6 @@ if isRedM then
         end
     end)
 end
-
 
 local function deleteProgressProps(serverId)
     local playerProps = createdProps[serverId]
