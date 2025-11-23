@@ -18,6 +18,12 @@ if cache.game == 'redm' then return end
 ---@field onPressed? fun(self: CKeybind)
 ---@field onReleased? fun(self: CKeybind)
 ---@field [string] any
+---@field onDoublePressed? fun(self: CKeybind)
+---@field doublePressRequiredDuration? number
+---@field secondaryMapper? string
+---@field secondaryKey? string
+---@field lastPressed? number
+---@field timeout? number
 
 ---@class CKeybind : KeybindProps
 ---@field currentKey string
@@ -31,6 +37,8 @@ local keybinds = {}
 
 local IsPauseMenuActive = IsPauseMenuActive
 local GetControlInstructionalButton = GetControlInstructionalButton
+local GetGameTimer = GetGameTimer
+local RegisterCommand = RegisterCommand
 
 local keybind_mt = {
     disabled = false,
@@ -65,6 +73,19 @@ function lib.addKeybind(data)
     RegisterCommand('+' .. data.name, function()
         if data.disabled or IsPauseMenuActive() then return end
         data.isPressed = true
+
+        if data.onDoublePressed then
+            local requiredDuration = data.doublePressRequiredDuration or 200
+
+            if (data.lastPressed and GetGameTimer() - data.lastPressed < requiredDuration) then
+                data:onDoublePressed()
+            end
+
+            data.lastPressed = GetGameTimer()
+        end
+
+
+
         if data.onPressed then data:onPressed() end
     end)
 
