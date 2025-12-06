@@ -9,6 +9,20 @@ local OxSelector = lib.class("OxSelector")
 local DEFAULT_SET = 'default'
 local deepClone = lib.table.deepclone
 
+
+local function calculateTotalWeight(set)
+    local total = 0
+    for i = 1, #set do
+        local item = set[i]
+        assert(type(item) == "table", "Each OxSelectorItem must be a table")
+        local weight = item[1]
+        assert(type(weight) == "number" and weight >= 0, "weight must be 0 or more")
+        total += weight
+    end
+    return total
+end
+
+
 ---@param sets OxSelectorSet | table<string, OxSelectorItem[]>
 function OxSelector:constructor(sets)
     if type(sets) ~= "table" then
@@ -26,18 +40,7 @@ function OxSelector:constructor(sets)
         assert(type(set) == "table" and lib.table.type(set) == "array", "Each set must be an array of OxSelectorItem")
         assert(#set > 0, "Each set must contain at least one OxSelectorItem")
 
-        self.private.totalWeights[setName] = 0
-        for i = 1, #set do
-            local item = set[i]
-
-            assert(type(item) == "table", "Each OxSelectorItem must be a table")
-
-            local weight = item[1]
-
-            assert(type(weight) == "number" and weight >= 0, "weight must be a non-negative number")
-
-            self.private.totalWeights[setName] += weight
-        end
+        self.private.totalWeights[setName] = calculateTotalWeight(set)
     end
 
     self.private.sets = sets
@@ -135,7 +138,9 @@ function OxSelector:addSet(setName, items)
     end
 
     assert(type(items) == "table" and lib.table.type(items) == "array", "items must be an array")
+    assert(#items > 0, "set must contain at least one OxSelectorItem")
 
+    self.private.totalWeights[setName] = calculateTotalWeight(items)
     self.private.sets[setName] = items
 end
 
@@ -151,7 +156,9 @@ function OxSelector:updateSet(setName, newItems)
     end
 
     assert(type(newItems) == "table" and lib.table.type(newItems) == "array", "newItems must be an array")
+    assert(#newItems > 0, "set must contain at least one OxSelectorItem")
 
+    self.private.totalWeights[setName] = calculateTotalWeight(newItems)
     self.private.sets[setName] = newItems
 end
 
@@ -160,6 +167,7 @@ end
 function OxSelector:removeSet(setName)
     assert(type(setName) == "string", "setName must be a string")
 
+    self.private.totalWeights[setName] = nil
     self.private.sets[setName] = nil
 end
 
