@@ -63,13 +63,11 @@ const Indicator: React.FC<Props> = ({
     },
     [multiplier, handleComplete]
   );
-
   const keyHandler = useCallback(
     (e: KeyboardEvent) => {
       const capitalHetaCode = 880;
       const isNonLatin = e.key.charCodeAt(0) >= capitalHetaCode;
       var convKey = e.key.toLowerCase()
-
       if (isNonLatin) {
         if (e.code.indexOf('Key') === 0 && e.code.length === 4) { // i.e. 'KeyW'
           convKey = e.code.charAt(3);
@@ -79,12 +77,11 @@ const Indicator: React.FC<Props> = ({
           convKey = e.code.charAt(5);
         }
       }
-
       setKeyPressed(convKey.toLowerCase());
     },
     [skillCheck]
   );
-  
+
   useEffect(() => {
     setIndicatorAngle(-90);
     startTimeRef.current = null;
@@ -110,11 +107,9 @@ const Indicator: React.FC<Props> = ({
     window.removeEventListener('keydown', keyHandler);
     completedRef.current = true;
 
-    if (keyPressed !== skillCheck.key || indicatorAngle < angle || indicatorAngle > angle + offset) {
+    if (keyPressed !== skillCheck.key || indicatorAngle < angle || indicatorAngle > angle + offset)
       handleComplete(false);
-    } else {
-      handleComplete(true);
-    }
+    else handleComplete(true);
 
     setKeyPressed(false);
   }, [
