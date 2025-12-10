@@ -108,8 +108,9 @@ local function table_merge(t1, t2, addDuplicateNumbers)
     return t1
 end
 
----@param tbl table
----@return table
+---@generic T : table
+---@param tbl T
+---@return T
 ---Shuffles the elements of a table randomly using the Fisher-Yates algorithm.
 local function shuffle(tbl)
     local len = #tbl
@@ -121,9 +122,10 @@ local function shuffle(tbl)
 end
 
 
----@param tbl table
----@param fn function(value: any, key: any): any
----@return table
+---@generic K, V, M
+---@param tbl table<K, V>
+---@param fn fun(value: V, key: K): M
+---@return table<K, M>
 local function map(tbl, fn)
     local result = {}
     for k, v in pairs(tbl) do
