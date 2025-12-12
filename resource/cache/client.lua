@@ -25,6 +25,7 @@ local GetVehicleMaxNumberOfPassengers = GetVehicleMaxNumberOfPassengers
 local GetMount = GetMount
 local IsPedOnMount = IsPedOnMount
 local GetCurrentPedWeapon = GetCurrentPedWeapon
+local GetSeatPedIsUsing = GetSeatPedIsUsing
 
 CreateThread(function()
 	while true do
@@ -60,6 +61,14 @@ CreateThread(function()
 				local mount = GetMount(ped)
 				local onMount = IsPedOnMount(ped)
 				cache:set('mount', onMount and mount or false)
+
+				if onMount then
+					cache:set('mount', mount)
+					cache:set('seat', GetSeatPedIsUsing(ped))
+				else
+					cache:set('mount', false)
+					cache:set('seat', false)
+				end
 			end
 
 			local hasWeapon, currentWeapon = GetCurrentPedWeapon(ped, true)
