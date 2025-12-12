@@ -178,7 +178,27 @@ local isFivem = cache.game == 'fivem'
 local controls = {
     ['INPUT_LOOK_LR'] = isFivem and 1 or 0xA987235F,
     ['INPUT_LOOK_UD'] = isFivem and 2 or 0xD2047988,
-    ['INPUT_MP_TEXT_CHAT_ALL'] = isFivem and 245 or 0x9720FCEE
+    ['INPUT_MP_TEXT_CHAT_ALL'] = isFivem and 245 or 0x9720FCEE, -- T
+    ['INPUT_FRONTEND_CANCEL'] = isFivem and 73 or 0x8CC9CD42, -- X
+    ['INPUT_CURSOR_SCROLL_UP'] = isFivem and 17 or 0xCC1075A7, -- Scroll up
+    ['INPUT_CURSOR_SCROLL_DOWN'] = isFivem and 16 or 0xFD0F0C2C, -- Scroll down
+    ['INPUT_SPRINT'] = isFivem and 21 or 0x8FFC75D6, -- Shift
+    ['INPUT_DUCK'] = isFivem and 36 or 0xDB096B85, -- Left Ctrl
+    ['INPUT_CHARACTER_WHEEL'] = isFivem and 19 or 0x8AAA0AD4, -- Left Alt
+    ['INPUT_MOVE_UP_ONLY'] = isFivem and 32 or 0x8FD015D8, -- W
+    ['INPUT_MOVE_DOWN_ONLY'] = isFivem and 33 or 0xD27782E3, -- S
+    ['INPUT_MOVE_RIGHT_ONLY'] = isFivem and 35 or 0xB4E465B4, -- D
+    ['INPUT_MOVE_LEFT_ONLY'] = isFivem and 34 or 0x7065027D, -- A
+    ['INPUT_RELOAD'] = isFivem and 45 or 0xE30CD707, -- R
+    ['INPUT_ENTER'] = isFivem and 23 or 0xB2F377E8, -- F
+    ['INPUT_CONTEXT'] = isFivem and 38 or 0xCEFD9220, -- E
+    ['INPUT_COVER'] = isFivem and 44 or 0xDE794E3E, -- Q
+    ['INPUT_DETONATE'] = isFivem and 47 or 0x760A9C6F, -- G
+    ['INPUT_LOOK_BEHIND'] = isFivem and 26 or 0x9959A6F0, -- C
+    ['INPUT_JUMP'] = isFivem and 22 or 0xD9D0E1C0, -- Space
+    ['INPUT_FRONTEND_ACCEPT'] = isFivem and 201 or 0xC7B5340A, -- Enter
+    ['INPUT_FRONTEND_DELETE'] = isFivem and 194 or 0x156F7119, -- Backspace
+    ['INPUT_FRONTEND_PAUSE'] = isFivem and 200 or 0x4A903C11, -- Esc
 }
 
 local function startCreator(arg, useLast)
@@ -202,7 +222,7 @@ local function startCreator(arg, useLast)
     while creatorActive do
         Wait(0)
 
-        if IsDisabledControlJustReleased(0, 73) then -- x
+        if IsDisabledControlJustReleased(0, controls['INPUT_FRONTEND_CANCEL']) then -- x
             controlsActive = not controlsActive
         end
 
@@ -251,22 +271,22 @@ local function startCreator(arg, useLast)
             local lStep = steps[1][step]
             local rStep = steps[2][step]
 
-            if IsDisabledControlJustReleased(0, 17) then -- scroll up
-                if IsDisabledControlPressed(0, 21) then -- shift held down
+            if IsDisabledControlJustReleased(0, controls['INPUT_CURSOR_SCROLL_UP']) then -- scroll up
+                if IsDisabledControlPressed(0, controls['INPUT_SPRINT']) then -- shift held down
                     change = true
                     height += lStep
-                elseif IsDisabledControlPressed(0, 36) then -- ctrl held down
+                elseif IsDisabledControlPressed(0, controls['INPUT_DUCK']) then -- ctrl held down
                     change = true
                     width += lStep
-                elseif IsDisabledControlPressed(0, 19) then -- alt held down
+                elseif IsDisabledControlPressed(0, controls['INPUT_CHARACTER_WHEEL']) then -- alt held down
                     change = true
                     length += lStep
                 elseif step < 11 then
                     change = true
                     step += 1
                 end
-            elseif IsDisabledControlJustReleased(0, 16) then -- scroll down
-                if IsDisabledControlPressed(0, 21) then -- shift held down
+            elseif IsDisabledControlJustReleased(0, controls['INPUT_CURSOR_SCROLL_DOWN']) then -- scroll down
+                if IsDisabledControlPressed(0, controls['INPUT_SPRINT']) then -- shift held down
                     change = true
 
                     if height - lStep > lStep then
@@ -274,7 +294,7 @@ local function startCreator(arg, useLast)
                     elseif height - lStep > 0 then
                         height = lStep
                     end
-                elseif IsDisabledControlPressed(0, 36) then -- ctrl held down
+                elseif IsDisabledControlPressed(0, controls['INPUT_DUCK']) then -- ctrl held down
                     change = true
 
                     if width - lStep > lStep then
@@ -282,7 +302,7 @@ local function startCreator(arg, useLast)
                     elseif width - lStep > 0 then
                         width = lStep
                     end
-                elseif IsDisabledControlPressed(0, 19) then -- alt held down
+                elseif IsDisabledControlPressed(0, controls['INPUT_CHARACTER_WHEEL']) then -- alt held down
                     change = true
 
                     if length - lStep > lStep then
@@ -294,7 +314,7 @@ local function startCreator(arg, useLast)
                     change = true
                     step -= 1
                 end
-            elseif IsDisabledControlJustReleased(0, 32) then -- w
+            elseif IsDisabledControlJustReleased(0, controls['INPUT_MOVE_UP_ONLY']) then -- w
                 change = true
 
                 if alignMovementWithCamera then
@@ -319,7 +339,7 @@ local function startCreator(arg, useLast)
 
                     yCoord = newValue
                 end
-            elseif IsDisabledControlJustReleased(0, 33) then -- s
+            elseif IsDisabledControlJustReleased(0, controls['INPUT_MOVE_DOWN_ONLY']) then -- s
                 change = true
 
                 if alignMovementWithCamera then
@@ -344,7 +364,7 @@ local function startCreator(arg, useLast)
 
                     yCoord = newValue
                 end
-            elseif IsDisabledControlJustReleased(0, 35) then -- d
+            elseif IsDisabledControlJustReleased(0, controls['INPUT_MOVE_RIGHT_ONLY']) then -- d
                 change = true
 
                 if alignMovementWithCamera then
@@ -369,7 +389,7 @@ local function startCreator(arg, useLast)
 
                     xCoord = newValue
                 end
-            elseif IsDisabledControlJustReleased(0, 34) then -- a
+            elseif IsDisabledControlJustReleased(0, controls['INPUT_MOVE_LEFT_ONLY']) then -- a
                 change = true
 
                 if alignMovementWithCamera then
@@ -394,7 +414,7 @@ local function startCreator(arg, useLast)
 
                     xCoord = newValue
                 end
-            elseif IsDisabledControlJustReleased(0, 45) then -- r
+            elseif IsDisabledControlJustReleased(0, controls['INPUT_RELOAD']) then -- r
                 change = true
                 local newValue = zCoord + lStep
 
@@ -403,7 +423,7 @@ local function startCreator(arg, useLast)
                 end
 
                 zCoord = newValue
-            elseif IsDisabledControlJustReleased(0, 23) then -- f
+            elseif IsDisabledControlJustReleased(0, controls['INPUT_ENTER']) then -- f
                 change = true
                 local newValue = zCoord - lStep
 
@@ -412,21 +432,21 @@ local function startCreator(arg, useLast)
                 end
 
                 zCoord = newValue
-            elseif IsDisabledControlJustReleased(0, 38) then -- e
+            elseif IsDisabledControlJustReleased(0, controls['INPUT_CONTEXT']) then -- e
                 change = true
                 heading -= rStep
 
                 if heading < 0 then
                     heading += 360
                 end
-            elseif IsDisabledControlJustReleased(0, 44) then -- q
+            elseif IsDisabledControlJustReleased(0, controls['INPUT_COVER']) then -- q
                 change = true
                 heading += rStep
 
                 if heading >= 360 then
                     heading -= 360
                 end
-            elseif IsDisabledControlJustReleased(0, 47) then -- g
+            elseif IsDisabledControlJustReleased(0, controls['INPUT_DETONATE']) then -- g
                 change = true
 
                 if displayMode == #displayModes then
@@ -434,10 +454,10 @@ local function startCreator(arg, useLast)
                 else
                     displayMode += 1
                 end
-            elseif IsDisabledControlJustReleased(0, 26) then -- c
+            elseif IsDisabledControlJustReleased(0, controls['INPUT_LOOK_BEHIND']) then -- c
                 change = true
                 alignMovementWithCamera = not alignMovementWithCamera
-            elseif IsDisabledControlJustReleased(0, 22) then -- space
+            elseif IsDisabledControlJustReleased(0, controls['INPUT_JUMP']) then -- space
                 change = true
 
                 if zoneType == 'poly' then
@@ -447,9 +467,9 @@ local function startCreator(arg, useLast)
                 coords = GetEntityCoords(cache.ped)
                 xCoord = round(coords.x)
                 yCoord = round(coords.y)
-            elseif IsDisabledControlJustReleased(0, 201) then -- enter
+            elseif IsDisabledControlJustReleased(0, controls['INPUT_FRONTEND_ACCEPT']) then -- enter
                 closeCreator()
-            elseif IsDisabledControlJustReleased(0, 194) then -- backspace
+            elseif IsDisabledControlJustReleased(0, controls['INPUT_FRONTEND_DELETE']) then -- backspace
                 change = true
 
                 if zoneType == 'poly' and #points > 0 then
@@ -458,7 +478,7 @@ local function startCreator(arg, useLast)
 
                     points[#points] = nil
                 end
-            elseif IsDisabledControlJustReleased(0, 200) then -- esc
+            elseif IsDisabledControlJustReleased(0, controls['INPUT_FRONTEND_PAUSE']) then -- esc
                 SetPauseMenuActive(false)
                 closeCreator(true)
             end
