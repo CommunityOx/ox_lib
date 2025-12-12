@@ -1,7 +1,15 @@
+--[[
+    https://github.com/overextended/ox_lib
+
+    This file is licensed under LGPL-3.0 or higher <https://www.gnu.org/licenses/lgpl-3.0.en.html>
+
+    Copyright © 2025 Linden <https://github.com/thelindat>
+]]
+
 ---@class OxCommandParams
 ---@field name string
 ---@field help? string
----@field type? 'number' | 'playerId' | 'string'
+---@field type? 'number' | 'playerId' | 'string' | 'longString'
 ---@field optional? boolean
 
 ---@class OxCommandProperties
@@ -18,7 +26,7 @@ SetTimeout(1000, function()
     TriggerClientEvent('chat:addSuggestions', -1, registeredCommands)
 end)
 
-AddEventHandler('playerJoining', function(source)
+AddEventHandler('playerJoining', function()
     TriggerClientEvent('chat:addSuggestions', source, registeredCommands)
 end)
 
@@ -30,7 +38,8 @@ end)
 local function parseArguments(source, args, raw, params)
     if not params then return args end
 
-    for i = 1, #params do
+    local paramsNum = #params
+    for i = 1, paramsNum do
         local arg, param = args[i], params[i]
         local value
 
@@ -41,8 +50,15 @@ local function parseArguments(source, args, raw, params)
         elseif param.type == 'playerId' then
             value = arg == 'me' and source or tonumber(arg)
 
-            if not value or not GetPlayerGuid(value--[[@as string]]) then
+            if not value or not DoesPlayerExist(value--[[@as string]]) then
                 value = false
+            end
+        elseif param.type == 'longString' and i == paramsNum then
+            if arg then
+                local start = raw:find(arg, 1, true)
+                value = start and raw:sub(start)
+            else
+                value = nil
             end
         else
             value = arg
@@ -102,7 +118,11 @@ function lib.addCommand(commandName, properties, cb, ...)
 
         if not args then return end
 
-        cb(source, args, raw)
+        local success, resp = pcall(cb, source, args, raw)
+
+        if not success then
+            Citizen.Trace(("^1command '%s' failed to execute!\n%s"):format(string.strsplit(' ', raw) or raw, resp))
+        end
     end
 
     for i = 1, numCommands do
@@ -127,6 +147,7 @@ function lib.addCommand(commandName, properties, cb, ...)
         end
 
         if properties then
+            ---@diagnostic disable-next-line: inject-field
             properties.name = ('/%s'):format(commandName)
             properties.restricted = nil
             registeredCommands[totalCommands] = properties

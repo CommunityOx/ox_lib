@@ -1,14 +1,33 @@
 {
   "language": "Español",
+  "settings": "Ajustes",
   "ui": {
     "cancel": "Cancelar",
     "close": "Cerrar",
     "confirm": "Confirmar",
-    "more": "Más..."
+    "more": "Más...",
+    "settings": {
+      "locale": "Change locale",
+      "locale_description": "Current language: ${language} (%s)",
+      "notification_audio": "Notification audio",
+      "notification_position": "Notification position"
+    },
+    "position": {
+      "bottom": "Bottom",
+      "bottom-left": "Bottom-left",
+      "bottom-right": "Bottom-right",
+      "center-left": "Center-left",
+      "center-right": "Center-right",
+      "top": "Top",
+      "top-left": "Top-left",
+      "top-right": "Top-right"
+    }
   },
-  "txadmin_announcement": "Server announcement by %s",
-  "txadmin_dm": "Direct Message from %s",
-  "txadmin_warn": "You have been warned by %s",
-  "txadmin_warn_content": "%s  \nAction ID: %s",
-  "txadmin_scheduledrestart": "Scheduled Restart"
+  "open_radial_menu": "Open radial menu",
+  "cancel_progress": "Cancel current progress bar",
+  "txadmin_announcement": "Anuncio de servidor de %s",
+  "txadmin_dm": "Mensaje directo de %s",
+  "txadmin_warn": "Has sido advertido por %s",
+  "txadmin_warn_content": "%s  \nID de acción: %s",
+  "txadmin_scheduledrestart": "Reinicio programado"
 }

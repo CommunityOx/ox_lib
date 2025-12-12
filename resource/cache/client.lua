@@ -1,3 +1,11 @@
+--[[
+    https://github.com/overextended/ox_lib
+
+    This file is licensed under LGPL-3.0 or higher <https://www.gnu.org/licenses/lgpl-3.0.en.html>
+
+    Copyright © 2025 Linden <https://github.com/thelindat>
+]]
+
 local cache = _ENV.cache
 cache.playerId = PlayerId()
 cache.serverId = GetPlayerServerId(cache.playerId)
@@ -26,6 +34,10 @@ CreateThread(function()
 		local vehicle = GetVehiclePedIsIn(ped, false)
 
 		if vehicle > 0 then
+			if vehicle ~= cache.vehicle then
+				cache:set('seat', false)
+			end
+
 			cache:set('vehicle', vehicle)
 
 			if not cache.seat or GetPedInVehicleSeat(vehicle, cache.seat) ~= ped then

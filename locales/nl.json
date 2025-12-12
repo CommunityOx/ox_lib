@@ -1,14 +1,33 @@
 {
   "language": "Nederlands",
+  "settings": "Instellingen",
   "ui": {
     "cancel": "Annuleren",
     "close": "Sluiten",
-    "confirm": "Bevestig",
-    "more": "More..."
+    "confirm": "Bevestigen",
+    "more": "Meer...",
+    "settings": {
+      "locale": "Taal wijzigen",
+      "locale_description": "Huidige taal: ${language} (%s)",
+      "notification_audio": "Meldingsgeluid",
+      "notification_position": "Meldingspositie"
+    },
+    "position": {
+      "bottom": "Onder",
+      "bottom-left": "Linksonder",
+      "bottom-right": "Rechtsonder",
+      "center-left": "Linksmidden",
+      "center-right": "Rechtsmidden",
+      "top": "Boven",
+      "top-left": "Linksboven",
+      "top-right": "Rechtsboven"
+    }
   },
-  "txadmin_announcement": "Server announcement by %s",
-  "txadmin_dm": "Direct Message from %s",
-  "txadmin_warn": "You have been warned by %s",
-  "txadmin_warn_content": "%s  \nAction ID: %s",
-  "txadmin_scheduledrestart": "Scheduled Restart"
+  "open_radial_menu": "Radiaal menu openen",
+  "cancel_progress": "Huidige voortgangsbalk annuleren",
+  "txadmin_announcement": "Server mededeling door %s",
+  "txadmin_dm": "Bericht van %s",
+  "txadmin_warn": "Je hebt een waarschuwing gekregen van %s",
+  "txadmin_warn_content": "%s  \nActie ID: %s",
+  "txadmin_scheduledrestart": "Geplande Server Restart"
 }

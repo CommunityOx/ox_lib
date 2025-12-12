@@ -1,3 +1,11 @@
+--[[
+    https://github.com/overextended/ox_lib
+
+    This file is licensed under LGPL-3.0 or higher <https://www.gnu.org/licenses/lgpl-3.0.en.html>
+
+    Copyright © 2025 Linden <https://github.com/thelindat>
+]]
+
 local contextMenus = {}
 local openContextMenu = nil
 
@@ -13,6 +21,7 @@ local openContextMenu = nil
 ---@field description? string
 ---@field metadata? string | { [string]: any } | string[]
 ---@field disabled? boolean
+---@field readOnly? boolean
 ---@field event? string
 ---@field serverEvent? string
 ---@field args? any

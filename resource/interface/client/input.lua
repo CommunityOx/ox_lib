@@ -1,7 +1,15 @@
+--[[
+    https://github.com/overextended/ox_lib
+
+    This file is licensed under LGPL-3.0 or higher <https://www.gnu.org/licenses/lgpl-3.0.en.html>
+
+    Copyright © 2025 Linden <https://github.com/thelindat>
+]]
+
 local input
 
 ---@class InputDialogRowProps
----@field type 'input' | 'number' | 'checkbox' | 'select' | 'slider' | 'multi-select' | 'date' | 'date-range' | 'time' | 'textarea'
+---@field type 'input' | 'number' | 'checkbox' | 'select' | 'slider' | 'multi-select' | 'date' | 'date-range' | 'time' | 'textarea' | 'color'
 ---@field label string
 ---@field options? { value: string, label: string, default?: string }[]
 ---@field password? boolean
@@ -17,8 +25,11 @@ local input
 ---@field autosize? boolean
 ---@field required? boolean
 ---@field format? string
----@field clearable? string
+---@field returnString? boolean
+---@field clearable? boolean
+---@field searchable? boolean
 ---@field description? string
+---@field maxSelectedValues? number
 
 ---@class InputDialogOptionsProps
 ---@field allowCancel? boolean

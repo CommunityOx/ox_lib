@@ -3,7 +3,7 @@ import { useNuiEvent } from '../../hooks/useNuiEvent';
 import Indicator from './indicator';
 import { fetchNui } from '../../utils/fetchNui';
 import { Box, createStyles } from '@mantine/core';
-import type { SkillCheckProps, GameDifficulty } from '../../typings';
+import type { GameDifficulty, SkillCheckProps } from '../../typings';
 
 export const circleCircumference = 2 * 50 * Math.PI;
 
@@ -15,27 +15,61 @@ const difficultyOffsets = {
   hard: 25,
 };
 
-const useStyles = createStyles((theme) => ({
+const useStyles = createStyles((theme, params: { difficultyOffset: number }) => ({
   svg: {
     position: 'absolute',
     top: '50%',
     left: '50%',
     transform: 'translate(-50%, -50%)',
+    r: 50,
+    width: 500,
+    height: 500,
   },
   track: {
     fill: 'transparent',
     stroke: theme.colors.dark[5],
     strokeWidth: 8,
+    r: 50,
+    cx: 250,
+    cy: 250,
+    strokeDasharray: circleCircumference,
+    '@media (min-height: 1440px)': {
+      strokeWidth: 10,
+      r: 65,
+      strokeDasharray: 2 * 65 * Math.PI,
+    },
   },
   skillArea: {
     fill: 'transparent',
     stroke: theme.fn.primaryColor(),
     strokeWidth: 8,
+    r: 50,
+    cx: 250,
+    cy: 250,
+    strokeDasharray: circleCircumference,
+    strokeDashoffset: circleCircumference - (Math.PI * 50 * params.difficultyOffset) / 180,
+    '@media (min-height: 1440px)': {
+      strokeWidth: 10,
+      r: 65,
+      strokeDasharray: 2 * 65 * Math.PI,
+      strokeDashoffset: 2 * 65 * Math.PI - (Math.PI * 65 * params.difficultyOffset) / 180,
+    },
   },
   indicator: {
     stroke: 'red',
     strokeWidth: 16,
     fill: 'transparent',
+    r: 50,
+    cx: 250,
+    cy: 250,
+    strokeDasharray: circleCircumference,
+    strokeDashoffset: circleCircumference - 3,
+    '@media (min-height: 1440px)': {
+      strokeWidth: 18,
+      r: 65,
+      strokeDasharray: 2 * 65 * Math.PI,
+      strokeDashoffset: 2 * 65 * Math.PI - 5,
+    },
   },
   button: {
     position: 'absolute',
@@ -49,11 +83,18 @@ const useStyles = createStyles((theme) => ({
     borderRadius: 5,
     fontSize: 16,
     fontWeight: 500,
+    display: 'flex',
+    justifyContent: 'center',
+    alignItems: 'center',
+    '@media (min-height: 1440px)': {
+      width: 30,
+      height: 30,
+      fontSize: 22,
+    },
   },
 }));
 
 const SkillCheck: React.FC = () => {
-  const { classes } = useStyles();
   const [visible, setVisible] = useState(false);
   const dataRef = useRef<{ difficulty: GameDifficulty | GameDifficulty[]; inputs?: string[] } | null>(null);
   const dataIndexRef = useRef<number>(0);
@@ -63,6 +104,7 @@ const SkillCheck: React.FC = () => {
     difficulty: 'easy',
     key: 'e',
   });
+  const { classes } = useStyles({ difficultyOffset: skillCheck.difficultyOffset });
 
   useNuiEvent('startSkillCheck', (data: { difficulty: GameDifficulty | GameDifficulty[]; inputs?: string[] }) => {
     dataRef.current = data;
@@ -74,7 +116,8 @@ const SkillCheck: React.FC = () => {
       angle: -90 + getRandomAngle(120, 360 - offset),
       difficultyOffset: offset,
       difficulty: gameData,
-      key: randomKey,
+      keys: data.inputs?.map((input) => input.toLowerCase()),
+      key: randomKey.toLowerCase(),
     });
 
     setVisible(true);
@@ -103,31 +146,24 @@ const SkillCheck: React.FC = () => {
       ? dataRef.current.inputs[Math.floor(Math.random() * dataRef.current.inputs.length)]
       : 'e';
     const offset = typeof data === 'object' ? data.areaSize : difficultyOffsets[data];
-    setSkillCheck({
+    setSkillCheck((prev) => ({
+      ...prev,
       angle: -90 + getRandomAngle(120, 360 - offset),
       difficultyOffset: offset,
       difficulty: data,
-      key,
-    });
+      key: key.toLowerCase(),
+    }));
   };
 
   return (
     <>
       {visible && (
         <>
-          <svg r={50} width={500} height={500} className={classes.svg}>
+          <svg className={classes.svg}>
             {/*Circle track*/}
-            <circle r={50} cx={250} cy={250} className={classes.track} strokeDasharray={circleCircumference} />
+            <circle className={classes.track} />
             {/*SkillCheck area*/}
-            <circle
-              r={50}
-              cx={250}
-              cy={250}
-              strokeDasharray={circleCircumference}
-              strokeDashoffset={circleCircumference - (Math.PI * 50 * skillCheck.difficultyOffset) / 180}
-              transform={`rotate(${skillCheck.angle}, 250, 250)`}
-              className={classes.skillArea}
-            />
+            <circle transform={`rotate(${skillCheck.angle}, 250, 250)`} className={classes.skillArea} />
             <Indicator
               angle={skillCheck.angle}
               offset={skillCheck.difficultyOffset}
