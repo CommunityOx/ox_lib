@@ -19,10 +19,7 @@ export function getClosestPlayer(
       const playerPed = GetPlayerPed(playerId);
       const [x, y, z] = GetEntityCoords(playerPed, false);
 
-      const dx = coords.x - x;
-      const dy = coords.y - y;
-      const dz = coords.z - z;
-      const distance = Math.sqrt(dx * dx + dy * dy + dz * dz);
+      const distance = coords.distance(new Vector3(x, y, z));
 
       if (distance < maxDistance) {
         maxDistance = distance;

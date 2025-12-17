@@ -1,7 +1,7 @@
 import { Vector3 } from "@nativewrappers/fivem";
 
 export function getClosestPlayer(
-  coords: { x: number; y: number; z: number },
+  coords: Vector3,
   maxDistance: number = 2.0,
   ignorePlayerId?: number | false
 ): [number, number, Vector3] | undefined {
@@ -17,10 +17,7 @@ export function getClosestPlayer(
       const playerPed = GetPlayerPed(playerId);
       const [x, y, z] = GetEntityCoords(playerPed, false);
       
-      const dx = coords.x - x;
-      const dy = coords.y - y;
-      const dz = coords.z - z;
-      const distance = Math.sqrt(dx * dx + dy * dy + dz * dz);
+      const distance = coords.distance(new Vector3(x, y, z));
 
       if (distance < maxDistance) {
         maxDistance = distance;
@@ -31,5 +28,5 @@ export function getClosestPlayer(
     }
   }
 
-  return closestCoords ? [closestId as number, closestPed as number, closestCoords as Vector3] : undefined;
+  return closestCoords ? [closestId as number, closestPed as number, closestCoords] : undefined;
 }
