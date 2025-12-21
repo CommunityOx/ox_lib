@@ -13,11 +13,13 @@ const openMenu = (id: string | undefined) => {
   fetchNui<ContextMenuProps>('openContext', { id: id, back: true });
 };
 
-const useStyles = createStyles((theme) => ({
+const useStyles = createStyles((theme, params: { position?: 'top-left' | 'top-right' | 'bottom-left' | 'bottom-right' }) => ({
   container: {
     position: 'absolute',
-    top: '15%',
-    right: '25%',
+    top: params.position === 'top-left' || params.position === 'top-right' ? '15%' : undefined,
+    left: params.position === 'top-left' || params.position === 'bottom-left' ? '5%' : undefined,
+    right: params.position === 'top-right' || params.position === 'bottom-right' ? '25%' : undefined,
+    bottom: params.position === 'bottom-left' || params.position === 'bottom-right' ? '15%' : undefined,,
     width: 320,
     height: 580,
   },
@@ -47,7 +49,7 @@ const useStyles = createStyles((theme) => ({
 }));
 
 const ContextMenu: React.FC = () => {
-  const { classes } = useStyles();
+  const { classes } = useStyles({ position: contextMenu.position || 'top-right' });
   const [visible, setVisible] = useState(false);
   const [contextMenu, setContextMenu] = useState<ContextMenuProps>({
     title: '',
