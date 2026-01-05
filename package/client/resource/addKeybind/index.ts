@@ -79,6 +79,11 @@ export function addKeybind(data: KeybindProps): CKeybind {
     if (kb.disabled || IsPauseMenuActive()) return;
     kb.isPressed = true;
     kb.onPressed?.call(kb);
+
+    if (kb.defaultMapper === "MOUSE_WHEEL") {
+      kb.isPressed = false;
+      kb.onReleased?.call(kb);
+    }
   }, false);
 
   RegisterCommand("-" + kb.name, () => {
