@@ -1,4 +1,4 @@
-import { Vector3 } from '@nativewrappers/client';
+import { Vector3 } from '@nativewrappers/fivem';
 import { cache } from '../cache';
 
 let points: Point[] = [];

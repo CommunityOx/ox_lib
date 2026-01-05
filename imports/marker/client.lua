@@ -102,8 +102,8 @@ end
 ---@param options MarkerProps
 function lib.marker.new(options)
   options.type =
-      type(options.type) == 'string' and markerTypes[options.type]
-      or type(options.type) == 'number' and options.type or nil
+    type(options.type) == 'string' and markerTypes[options.type]
+    or type(options.type) == 'number' and options.type or nil
 
   local self = setmetatable(options, marker_mt)
 

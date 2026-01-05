@@ -14,3 +14,4 @@ export * from './vehicleProperties';
 export * from './callback';
 export * from './points';
 export * from './dui';
+export * from './addKeybind';

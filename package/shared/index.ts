@@ -1,6 +1,10 @@
 export * from './resource';
 
 export const context: 'server' | 'client' = IsDuplicityVersion() ? 'server' : 'client';
+<<<<<<< HEAD
+=======
+
+>>>>>>> upstream/main
 // https://www.raygesualdo.com/posts/flattening-object-keys-with-typescript-types/
 export type FlattenObjectKeys<T extends Record<string, any>, Key = keyof T> = Key extends string
   ? T[Key] extends Record<string, unknown>

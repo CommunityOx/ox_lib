@@ -94,6 +94,7 @@ end
 
 if service == 'fivemanage' then
     local key = GetConvar('fivemanage:key', '')
+    local dataset = GetConvar('fivemanage:dataset', '')
 
     if key ~= '' then
         local endpoint = 'https://api.fivemanage.com/api/logs/batch'
@@ -101,8 +102,12 @@ if service == 'fivemanage' then
         local headers = {
             ['Content-Type'] = 'application/json',
             ['Authorization'] = key,
-            ['User-Agent'] = 'ox_lib'
+            ['User-Agent'] = 'ox_lib',
         }
+
+        if dataset ~= "" then
+            headers['X-Fivemanage-Dataset'] = dataset
+        end
 
         function lib.logger(source, event, message, ...)
             if not buffer then
@@ -123,17 +128,43 @@ if service == 'fivemanage' then
                 end)
             end
 
+            local metadata = {
+                hostname = hostname,
+                service = event,
+                source = source,
+            }
+
+            local playerTags = formatTags(source, nil)
+            if playerTags and type(playerTags) == 'string' then
+                local tempTable = { string.strsplit(',', playerTags) }
+                for _, v in pairs(tempTable) do
+                    local key, value = string.strsplit(':', v)
+                    if key and value then
+                        metadata[key] = value
+                    end
+                end
+            end
+
+            local args = { ... }
+            for _, arg in pairs(args) do
+                if type(arg) == 'table' then
+                    for k, v in pairs(arg) do
+                        metadata[k] = v
+                    end
+                elseif type(arg) == 'string' then
+                    local key, value = string.strsplit(':', arg)
+                    if key and value then
+                        metadata[key] = value
+                    end
+                end
+            end
+
             bufferSize += 1
             buffer[bufferSize] = {
                 level = "info",
                 message = message,
                 resource = cache.resource,
-                metadata = {
-                    hostname = hostname,
-                    service = event,
-                    source = source,
-                    tags = formatTags(source, ... and string.strjoin(',', string.tostringall(...)) or nil),
-                }
+                metadata = metadata,
             }
         end
     end

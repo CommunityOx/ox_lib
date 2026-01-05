@@ -50,9 +50,7 @@
     "prop-types": "^15.8.1",
     "rimraf": "^3.0.2"
   },
-  "pnpm": {
-    "patchedDependencies": {
-      "react-hot-toast@2.4.0": "patches/react-hot-toast@2.4.0.patch"
-    }
+  "patchedDependencies": {
+    "react-hot-toast@2.5.2": "patches/react-hot-toast@2.5.2.patch"
   }
 }

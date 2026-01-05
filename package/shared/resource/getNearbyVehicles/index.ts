@@ -1,6 +1,10 @@
 import { cache } from '../cache/index';
 import { context } from '../../index';
+<<<<<<< HEAD
 import { Vector3 } from "@nativewrappers/client";
+=======
+import { Vector3 } from "@nativewrappers/fivem";
+>>>>>>> upstream/main
 
 interface NearbyVehicle {
     vehicle: number;
@@ -26,4 +30,8 @@ export function getNearbyVehicles(coords: Vector3, maxDistance: number = 2.0, in
     }
 
     return nearbyVehicles;
+<<<<<<< HEAD
 }
+=======
+}
+>>>>>>> upstream/main

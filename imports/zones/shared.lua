@@ -345,6 +345,8 @@ local function setZone(data)
     data.contains = data.contains or contains
 
     if lib.context == 'client' then
+        local coords = cache.coords or GetEntityCoords(cache.ped)
+        data.distance = #(data.coords - coords)
         data.setDebug = setDebug
 
         if data.debug then
