@@ -66,6 +66,11 @@ function lib.addKeybind(data)
         if data.disabled or IsPauseMenuActive() then return end
         data.isPressed = true
         if data.onPressed then data:onPressed() end
+
+        if data.defaultMapper == 'MOUSE_WHEEL' then
+            data.isPressed = false
+            if data.onReleased then data:onReleased() end
+        end
     end)
 
     RegisterCommand('-' .. data.name, function()
