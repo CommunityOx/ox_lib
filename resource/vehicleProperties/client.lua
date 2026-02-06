@@ -201,7 +201,7 @@ function lib.getVehicleProperties(vehicle)
         model = GetEntityModel(vehicle)
         return {
             model = model,
-            modelname = string.gsub(string.lower(GetLabelText(GetDisplayNameFromVehicleModel(model))), "%s+", ""),
+            modelname = string.gsub(string.lower(GetDisplayNameFromVehicleModel(model)), "%s+", ""),
             plate = GetVehicleNumberPlateText(vehicle),
             plateIndex = GetVehicleNumberPlateTextIndex(vehicle),
             lockState = GetVehicleDoorLockStatus(vehicle),
