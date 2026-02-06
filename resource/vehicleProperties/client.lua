@@ -198,10 +198,10 @@ function lib.getVehicleProperties(vehicle)
         for i = 0, 3 do
             neons[i + 1] = IsVehicleNeonLightEnabled(vehicle, i)
         end
-
+        model = GetEntityModel(vehicle)
         return {
-            model = GetEntityModel(vehicle),
-            modelname = string.gsub(string.lower(GetLabelText(GetDisplayNameFromVehicleModel(GetEntityModel(vehicle)))), "%s+", ""),
+            model = model,
+            modelname = string.gsub(string.lower(GetLabelText(GetDisplayNameFromVehicleModel(model))), "%s+", ""),
             plate = GetVehicleNumberPlateText(vehicle),
             plateIndex = GetVehicleNumberPlateTextIndex(vehicle),
             lockState = GetVehicleDoorLockStatus(vehicle),
