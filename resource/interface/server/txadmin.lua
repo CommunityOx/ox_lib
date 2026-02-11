@@ -7,6 +7,7 @@
 ]]
 
 if GetConvarInt('ox:txAdminNotifications', 0) == 0 then return end
+lib.locale()
 
 if GetConvarInt('txAdmin-hideDefaultAnnouncement', 0) == 1 then
     AddEventHandler('txAdmin:events:announcement', function(eventData)
@@ -31,9 +32,11 @@ if GetConvarInt('txAdmin-hideDefaultDirectMessage', 0) == 1 then
 end
 
 if GetConvarInt('txAdmin-hideDefaultWarning', 0) == 1 then
+    print("^5[ox_lib] ^3Overriding txAdmin warning dialog", GetConvarInt("txAdmin-hideAdminInMessages", 0))
     AddEventHandler('txAdmin:events:playerWarned', function(eventData)
-        TriggerClientEvent('ox_lib:alertDialog', eventData.target, {
-            header = locale('txadmin_warn', eventData.author),
+        local author = GetConvarInt("txAdmin-hideAdminInMessages", 0) == 1 and "Admin" or eventData.author
+        TriggerClientEvent('ox_lib:alertDialog', eventData.targetNetId, {
+            header = locale('txadmin_warn', author),
             content = locale('txadmin_warn_content', eventData.reason, eventData.actionId),
             centered = true
         })
