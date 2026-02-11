@@ -33,6 +33,7 @@ local openContextMenu = nil
 ---@field id string
 ---@field title string
 ---@field menu? string
+---@field position? MenuPosition
 ---@field onExit? fun()
 ---@field onBack? fun()
 ---@field canClose? boolean
@@ -67,6 +68,7 @@ function lib.showContext(id)
             title = data.title,
             canClose = data.canClose,
             menu = data.menu,
+            position = data.position,
             options = data.options
         }
     }, { sort_keys = true }))
