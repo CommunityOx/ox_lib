@@ -29,7 +29,7 @@ export function triggerClientCallback<T = unknown>(
 
   return new Promise<T>((resolve, reject) => {
     pendingCallbacks[key] = (args) => {
-      if (args[0] === 'cb_invalid') reject(`callback '${eventName} does not exist`);
+      if (Array.isArray(args) && args[0] === 'cb_invalid') reject(`callback '${eventName} does not exist`);
 
       resolve(args);
     };
