@@ -5,6 +5,10 @@ on:
     tags:
       - 'v*.*.*'
 
+permissions:
+  id-token: write # Required for OIDC
+  contents: write
+
 jobs:
   create-release:
     if: github.actor_id != 210085057
@@ -86,8 +90,11 @@ jobs:
         with:
           ref: ${{ github.ref_name }}
 
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+
       - name: Publish package to npm registry
-        run: bun publish --access public
-        working-directory: package
-        env:
-          NPM_CONFIG_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: npm publish --access public
