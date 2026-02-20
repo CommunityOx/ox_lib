@@ -98,3 +98,4 @@ jobs:
 
       - name: Publish package to npm registry
         run: npm publish --access public
+        working-directory: package
