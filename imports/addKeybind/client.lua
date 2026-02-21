@@ -59,26 +59,46 @@ end
 ---@return CKeybind
 function lib.addKeybind(data)
     ---@cast data CKeybind
-    data.hash = joaat('+' .. data.name) | 0x80000000
-    keybinds[data.name] = setmetatable(data, keybind_mt)
+    
+    if(string.upper(data.defaultMapper) == "MOUSE_WHEEL")then
+        data.hash = joaat(data.name) | 0x80000000
+        keybinds[data.name] = setmetatable(data, keybind_mt)
 
-    RegisterCommand('+' .. data.name, function()
-        if data.disabled or IsPauseMenuActive() then return end
-        data.isPressed = true
-        if data.onPressed then data:onPressed() end
-    end)
+        RegisterCommand(data.name, function()
+            if data.disabled or IsPauseMenuActive() then return end
+            data.isPressed = true
+            if data.onPressed then data:onPressed() end
+        end)
 
-    RegisterCommand('-' .. data.name, function()
-        if data.disabled or IsPauseMenuActive() then return end
-        data.isPressed = false
-        if data.onReleased then data:onReleased() end
-    end)
+        RegisterKeyMapping(data.name, data.description, data.defaultMapper, data.defaultKey)
 
-    RegisterKeyMapping('+' .. data.name, data.description, data.defaultMapper, data.defaultKey)
+        if data.secondaryKey then
+            RegisterKeyMapping('~!' .. data.name, data.description, data.secondaryMapper or data.defaultMapper, data.secondaryKey)
+        end
+    else
+        data.hash = joaat('+' .. data.name) | 0x80000000
+        keybinds[data.name] = setmetatable(data, keybind_mt)
 
-    if data.secondaryKey then
-        RegisterKeyMapping('~!+' .. data.name, data.description, data.secondaryMapper or data.defaultMapper, data.secondaryKey)
+        RegisterCommand('+' .. data.name, function()
+            if data.disabled or IsPauseMenuActive() then return end
+            data.isPressed = true
+            if data.onPressed then data:onPressed() end
+        end)
+
+        RegisterCommand('-' .. data.name, function()
+            if data.disabled or IsPauseMenuActive() then return end
+            data.isPressed = false
+            if data.onReleased then data:onReleased() end
+        end)
+
+        RegisterKeyMapping('+' .. data.name, data.description, data.defaultMapper, data.defaultKey)
+
+        if data.secondaryKey then
+            RegisterKeyMapping('~!+' .. data.name, data.description, data.secondaryMapper or data.defaultMapper, data.secondaryKey)
+        end
     end
+
+    
 
     SetTimeout(500, function()
         TriggerEvent('chat:removeSuggestion', ('/+%s'):format(data.name))
