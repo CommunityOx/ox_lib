@@ -25,6 +25,10 @@ function lib.getClosestPlayer(coords, maxDistance, includePlayer)
 			local playerCoords = GetEntityCoords(playerPed)
 			local distance = #(coords - playerCoords)
 
+            if(GetVehiclePedIsIn(playerPed,false) ~= 0 ) then
+				playerCoords=GetWorldPositionOfEntityBone(playerPed,0);
+			end 
+
 			if distance < maxDistance then
 				maxDistance = distance
 				closestId = playerId
