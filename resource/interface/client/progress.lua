@@ -11,6 +11,7 @@ local DisableControlAction = DisableControlAction
 local DisablePlayerFiring = DisablePlayerFiring
 local playerState = LocalPlayer.state
 local createdProps = {}
+local createdPtfx = {}
 local maxProps = GetConvarInt('ox:progressPropLimit', 2)
 
 ---@class ProgressPropProps
@@ -46,7 +47,30 @@ local function createProp(ped, prop)
         true, false, true, prop.rotOrder or 0, true)
     SetModelAsNoLongerNeeded(result)
 
-    return object
+    local ptfx = nil
+    local ptfxData = prop.ptfx
+    if ptfxData then
+        local ok, result = pcall(lib.requestNamedPtfxAsset, ptfxData.asset)
+        if not ok then
+            lib.print.error(result)
+            goto skip
+        end
+
+        UseParticleFxAssetNextCall(ptfxData.asset)
+        ptfx = StartParticleFxLoopedOnEntity(
+            ptfxData.name,
+            object,
+            ptfxData.pos.x, ptfxData.pos.y, ptfxData.pos.z,
+            ptfxData.rot.x, ptfxData.rot.y, ptfxData.rot.z,
+            ptfxData.scale or 1.0,
+            false, false, false
+        )
+        RemoveNamedPtfxAsset(ptfxData.asset)
+    
+        ::skip::
+    end
+
+    return object, ptfx
 end
 
 local function interruptProgress(data)
@@ -229,16 +253,28 @@ end
 
 local function deleteProgressProps(serverId)
     local playerProps = createdProps[serverId]
+    if playerProps then
+        createdProps[serverId] = nil
+    
+        for i = 1, #playerProps do
+            local prop = playerProps[i]
+    
+            if DoesEntityExist(prop) then
+                DeleteEntity(prop)
+            end
+        end
+    end
 
-    if not playerProps then return end
-
-    createdProps[serverId] = nil
-
-    for i = 1, #playerProps do
-        local prop = playerProps[i]
-
-        if DoesEntityExist(prop) then
-            DeleteEntity(prop)
+    local playerPtfx = createdPtfx[serverId]
+    if playerPtfx then
+        createdPtfx[serverId] = nil
+    
+        for i = 1, #playerPtfx do
+            local ptfx = playerPtfx[i]
+    
+            if DoesParticleFxLoopedExist(ptfx) then
+                StopParticleFxLooped(ptfx, false)
+            end
         end
     end
 end
@@ -261,24 +297,32 @@ AddStateBagChangeHandler('lib:progressProps', nil, function(bagName, key, value,
     end
 
     local playerProps = {}
+    local playerPtfx = {}
 
     if value.model then
-        local prop = createProp(ped, value)
+        local prop, ptfx = createProp(ped, value)
 
         if prop then
             playerProps[#playerProps + 1] = prop
+        end
+        if ptfx then
+            playerPtfx[#playerPtfx + 1] = ptfx
         end
     else
         local propCount = math.min(maxProps, #value)
 
         for i = 1, propCount do
-            local prop = createProp(ped, value[i])
+            local prop, ptfx = createProp(ped, value[i])
 
             if prop then
                 playerProps[#playerProps + 1] = prop
+            end
+            if ptfx then
+                playerPtfx[#playerPtfx + 1] = ptfx
             end
         end
     end
 
     createdProps[serverId] = playerProps
+    createdPtfx[serverId] = playerPtfx
 end)
