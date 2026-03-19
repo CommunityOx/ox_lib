@@ -10,6 +10,7 @@ if cache.game == 'redm' then return end
 
 ---@class VehicleProperties
 ---@field model? number
+---@field modelname string
 ---@field plate? string
 ---@field plateIndex? number
 ---@field lockState? number
@@ -201,6 +202,7 @@ function lib.getVehicleProperties(vehicle)
 
         return {
             model = GetEntityModel(vehicle),
+            modelname = GetEntityArchetypeName(vehicle),
             plate = GetVehicleNumberPlateText(vehicle),
             plateIndex = GetVehicleNumberPlateTextIndex(vehicle),
             lockState = GetVehicleDoorLockStatus(vehicle),
