@@ -20,3 +20,21 @@ function lib.resetNuiFocus()
     SetNuiFocus(false, false)
     SetNuiFocusKeepInput(keepInput)
 end
+
+function lib.closeAllNui(except)
+    if except ~= 'context' and lib.getOpenContextMenu() then
+        lib.hideContext(false)
+    end
+    if except ~= 'menu' and lib.getOpenMenu() then
+        lib.hideMenu(false)
+    end
+    if except ~= 'input' then
+        lib.closeInputDialog()
+    end
+    if except ~= 'alert' then
+        lib.closeAlertDialog()
+    end
+    if except ~= 'radial' then
+        lib.hideRadial()
+    end
+end

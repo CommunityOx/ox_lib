@@ -42,6 +42,7 @@ local input
 ---@param options InputDialogOptionsProps[]?
 ---@return string[] | number[] | boolean[] | nil
 function lib.inputDialog(heading, rows, options)
+    lib.closeAllNui('input')
     if input then return end
     input = promise.new()
 

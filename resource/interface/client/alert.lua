@@ -23,6 +23,7 @@ local alertId = 0
 ---@param timeout? number Force the window to timeout after `x` milliseconds.
 ---@return 'cancel' | 'confirm' | nil
 function lib.alertDialog(data, timeout)
+    lib.closeAllNui('alert')
     if alert then return end
 
     local id = alertId + 1

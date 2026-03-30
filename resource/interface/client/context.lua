@@ -54,6 +54,7 @@ end
 
 ---@param id string
 function lib.showContext(id)
+    lib.closeAllNui('context')
     if not contextMenus[id] then error('No context menu of such id found.') end
 
     local data = contextMenus[id]

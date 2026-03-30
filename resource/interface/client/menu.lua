@@ -54,6 +54,7 @@ end
 ---@param id string
 ---@param startIndex? number
 function lib.showMenu(id, startIndex)
+    lib.closeAllNui('menu')
     local menu = registeredMenus[id]
     if not menu then
         error(('No menu with id %s was found'):format(id))
