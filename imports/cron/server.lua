@@ -51,13 +51,6 @@ local validRanges = {
     wday = { min = 0, max = 7 },
 }
 
-local maxUnits = {
-    min = 60,
-    hour = 24,
-    wday = 7,
-    day = 31,
-    month = 12,
-}
 
 local weekdayMap = {
     sun = 1,
@@ -80,7 +73,7 @@ local monthMap = {
 ---@param year? number
 ---@return number
 local function getMaxDaysInMonth(month, year)
-    return os.date('*t', os.time({ year = year or currentDate.year, month = month + 1, day = -1 })).day --[[@as number]]
+    return os.date('*t', os.time({ year = year or currentDate.year, month = month + 1, day = 0 })).day --[[@as number]]
 end
 
 ---@param value string|number
@@ -99,8 +92,8 @@ local function parseCron(value, unit)
     if not value or value == '*' then return end
 
     if unit == 'day' and value:lower() == 'l' then
-        return function()
-            return getMaxDaysInMonth(currentDate.month, currentDate.year)
+        return function(month, year)
+            return getMaxDaysInMonth(month or currentDate.month, year or currentDate.year)
         end
     end
 
@@ -170,178 +163,111 @@ local function parseCron(value, unit)
     error(("^1invalid cron expression. '%s' is not supported for %s^0"):format(value, unit), 3)
 end
 
----@param value string|number|function|nil
----@param unit string
----@return number|false|nil
-local function getTimeUnit(value, unit)
-    local currentTime = currentDate[unit]
 
-    if not value then
-        return unit == 'min' and currentTime + 1 or currentTime
+---Checks if a given value matches a cron field specification.
+---@param field number|string|function|nil
+---@param value number
+---@param candidateMonth? number
+---@param candidateYear? number
+---@return boolean
+local function matchesField(field, value, candidateMonth, candidateYear)
+    if not field then return true end
+
+    if type(field) == 'function' then
+        return value == field(candidateMonth, candidateYear)
     end
 
-    if type(value) == 'function' then
-        return value()
+    if type(field) == 'number' then
+        return value == field
     end
 
-    local unitMax = maxUnits[unit]
+    local step = field:match('^%*/(%d+)$')
+    if step then
+        return value % tonumber(step) == 0
+    end
 
-    if type(value) == 'string' then
-        local stepValue = string.match(value, '*/(%d+)')
-
-        if stepValue then
-            local step = tonumber(stepValue)
-            for i = currentTime + 1, unitMax do
-                if i % step == 0 then return i end
-            end
-            return step + unitMax
+    local min, max = field:match('^(%d+)-(%d+)$')
+    if min and max then
+        min, max = tonumber(min), tonumber(max)
+        if max >= min then
+            return value >= min and value <= max
+        else
+            return value >= min or value <= max
         end
-
-        local range = string.match(value, '%d+-%d+')
-        if range then
-            local min, max = string.strsplit('-', range)
-            min, max = tonumber(min, 10), tonumber(max, 10)
-
-            if unit == 'min' then
-                if currentTime >= max then
-                    return min + unitMax
-                end
-            elseif currentTime > max then
-                return min + unitMax
-            end
-
-            return currentTime < min and min or currentTime
-        end
-
-        local list = string.match(value, '%d+,%d+')
-        if list then
-            local values = {}
-            for listValue in string.gmatch(value, '%d+') do
-                values[#values + 1] = tonumber(listValue)
-            end
-            table.sort(values)
-
-            for i = 1, #values do
-                local listValue = values[i]
-                if unit == 'min' then
-                    if currentTime < listValue then
-                        return listValue
-                    end
-                elseif currentTime <= listValue then
-                    return listValue
-                end
-            end
-
-            return values[1] + unitMax
-        end
-
-        return false
     end
 
-    if unit == 'min' then
-        return value <= currentTime and value + unitMax or value --[[@as number]]
+    for item in field:gmatch('%d+') do
+        if value == tonumber(item) then
+            return true
+        end
     end
 
-    return value < currentTime and value + unitMax or value --[[@as number]]
+    return false
 end
 
 ---@return number?
 function OxTask:getNextTime()
     if not self.isActive then return end
 
-    local day = getTimeUnit(self.day, 'day')
+    local now = os.time()
+    local startDate = os.date('*t', now) --[[@as Date]]
+    startDate.sec = 0
+    startDate.min = startDate.min + 1
+    startDate = os.date('*t', os.time(startDate)) --[[@as Date]]
 
-    if day == 0 then
-        day = getMaxDaysInMonth(currentDate.month)
-    end
+    for dayOffset = 0, 366 do
+        local candidate
 
-    if day ~= currentDate.day then return end
-
-    local month = getTimeUnit(self.month, 'month')
-    if month ~= currentDate.month then return end
-
-    local weekday = getTimeUnit(self.weekday, 'wday')
-    if weekday and weekday ~= currentDate.wday then return end
-
-    local minute = getTimeUnit(self.minute, 'min')
-    if not minute then return end
-
-    local hour = getTimeUnit(self.hour, 'hour')
-    if not hour then return end
-
-    if minute >= maxUnits.min then
-        if not self.hour then
-            hour += math.floor(minute / maxUnits.min)
+        if dayOffset == 0 then
+            candidate = startDate
+        else
+            local t = os.time({ year = startDate.year, month = startDate.month, day = startDate.day, hour = 12 }) + dayOffset * 86400
+            candidate = os.date('*t', t) --[[@as Date]]
         end
-        minute = minute % maxUnits.min
-    end
 
-    if hour >= maxUnits.hour and day then
-        if not self.day then
-            day += math.floor(hour / maxUnits.hour)
+        if matchesField(self.month, candidate.month)
+            and matchesField(self.day, candidate.day, candidate.month, candidate.year)
+            and matchesField(self.weekday, candidate.wday)
+        then
+            local startHour = (dayOffset == 0) and startDate.hour or 0
+
+            for h = startHour, 23 do
+                if matchesField(self.hour, h) then
+                    local startMin = (dayOffset == 0 and h == startDate.hour) and startDate.min or 0
+
+                    for m = startMin, 59 do
+                        if matchesField(self.minute, m) then
+                            local nextTime = os.time({
+                                year = candidate.year,
+                                month = candidate.month,
+                                day = candidate.day,
+                                hour = h,
+                                min = m,
+                                sec = 0,
+                            })
+
+                            if self.lastRun and nextTime - self.lastRun < 60 then
+                                if self.debug then
+                                    lib.print.debug(('Preventing duplicate execution of task %s - Last run: %s, Next scheduled: %s'):format(
+                                        self.id,
+                                        os.date('%c', self.lastRun),
+                                        os.date('%c', nextTime)
+                                    ))
+                                end
+                            else
+                                return nextTime
+                            end
+                        end
+                    end
+                end
+            end
         end
-        hour = hour % maxUnits.hour
     end
-
-    local nextTime = os.time({
-        min = minute,
-        hour = hour,
-        day = day or currentDate.day,
-        month = month or currentDate.month,
-        year = currentDate.year,
-    })
-
-    if self.lastRun and nextTime - self.lastRun < 60 then
-        if self.debug then
-            lib.print.debug(('Preventing duplicate execution of task %s - Last run: %s, Next scheduled: %s'):format(
-                self.id,
-                os.date('%c', self.lastRun),
-                os.date('%c', nextTime)
-            ))
-        end
-        return
-    end
-
-    return nextTime
 end
 
 ---@return number
 function OxTask:getAbsoluteNextTime()
-    local minute = getTimeUnit(self.minute, 'min')
-    local hour = getTimeUnit(self.hour, 'hour')
-    local day = getTimeUnit(self.day, 'day')
-    local month = getTimeUnit(self.month, 'month')
-    local year = getTimeUnit(self.year, 'year')
-
-    if self.day then
-        if currentDate.hour < hour or (currentDate.hour == hour and currentDate.min < minute) then
-            day = day - 1
-            if day < 1 then
-                day = getMaxDaysInMonth(currentDate.month)
-            end
-        end
-
-        if currentDate.hour > hour or (currentDate.hour == hour and currentDate.min >= minute) then
-            day = day + 1
-            if day > getMaxDaysInMonth(currentDate.month) or day == 1 then
-                day = 1
-                month = month + 1
-            end
-        end
-    end
-
-    ---@diagnostic disable-next-line: assign-type-mismatch
-    if os.time({ year = year, month = month, day = day, hour = hour, min = minute }) < os.time() then
-        year = year and year + 1 or currentDate.year + 1
-    end
-
-    return os.time({
-        min = minute < 60 and minute or 0,
-        hour = hour < 24 and hour or 0,
-        day = day or currentDate.day,
-        month = month or currentDate.month,
-        year = year or currentDate.year,
-    })
+    return self:getNextTime() or os.time()
 end
 
 function OxTask:getTimeAsString(timestamp)
@@ -350,12 +276,13 @@ end
 
 ---@type OxTask[]
 local tasks = {}
+local nextTaskId = 0
 
 function OxTask:scheduleTask()
     local runAt = self:getNextTime()
 
     if not runAt then
-        return self:stop('getNextTime returned no value')
+        return self:stop('getNextTime returned no value', true)
     end
 
     local currentTime = os.time()
@@ -363,7 +290,7 @@ function OxTask:scheduleTask()
 
     if sleep < 0 then
         if not self.maxDelay or -sleep > self.maxDelay then
-            return self:stop(self.debug and ('scheduled time expired %s seconds ago'):format(-sleep))
+            return self:stop(self.debug and ('scheduled time expired %s seconds ago'):format(-sleep), true)
         end
 
         if self.debug then
@@ -410,14 +337,16 @@ function OxTask:run()
     if self.isActive then return end
 
     self.isActive = true
+    self.manualStop = false
 
     CreateThread(function()
         while self:scheduleTask() do end
     end)
 end
 
-function OxTask:stop(msg)
+function OxTask:stop(msg, internal)
     self.isActive = false
+    self.manualStop = not internal
 
     if self.debug then
         if msg then
@@ -426,6 +355,11 @@ function OxTask:stop(msg)
 
         lib.print.debug(('stopping task %s'):format(self.id))
     end
+end
+
+function OxTask:destroy()
+    self:stop()
+    tasks[self.id] = nil
 end
 
 ---@param expression string A cron expression such as `* * * * *` representing minute, hour, day, month, and day of the week.
@@ -450,7 +384,8 @@ function lib.cron.new(expression, job, options)
     task.day = parseCron(day, 'day')
     task.month = parseCron(month, 'month')
     task.weekday = parseCron(weekday, 'wday')
-    task.id = #tasks + 1
+    nextTaskId = nextTaskId + 1
+    task.id = nextTaskId
     task.job = job
     task.lastRun = nil
     task.maxDelay = task.maxDelay or 1
@@ -462,9 +397,8 @@ end
 
 -- reschedule any dead tasks on a new day
 lib.cron.new('0 0 * * *', function()
-    for i = 1, #tasks do
-        local task = tasks[i]
-        if not task.isActive then
+    for _, task in pairs(tasks) do
+        if not task.isActive and not task.manualStop then
             task:run()
         end
     end
