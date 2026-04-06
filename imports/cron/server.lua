@@ -99,8 +99,8 @@ local function parseCron(value, unit)
     if not value or value == '*' then return end
 
     if unit == 'day' and value:lower() == 'l' then
-        return function()
-            return getMaxDaysInMonth(currentDate.month, currentDate.year)
+        return function(month, year)
+            return getMaxDaysInMonth(month or currentDate.month, year or currentDate.year)
         end
     end
 
@@ -245,64 +245,105 @@ local function getTimeUnit(value, unit)
     return value < currentTime and value + unitMax or value --[[@as number]]
 end
 
+---Checks if a given value matches a cron field specification.
+---@param field number|string|function|nil
+---@param value number
+---@param candidateMonth? number
+---@param candidateYear? number
+---@return boolean
+local function matchesField(field, value, candidateMonth, candidateYear)
+    if not field then return true end
+
+    if type(field) == 'function' then
+        return value == field(candidateMonth, candidateYear)
+    end
+
+    if type(field) == 'number' then
+        return value == field
+    end
+
+    local step = field:match('^%*/(%d+)$')
+    if step then
+        return value % tonumber(step) == 0
+    end
+
+    local min, max = field:match('^(%d+)-(%d+)$')
+    if min and max then
+        min, max = tonumber(min), tonumber(max)
+        if max >= min then
+            return value >= min and value <= max
+        else
+            return value >= min or value <= max
+        end
+    end
+
+    for item in field:gmatch('%d+') do
+        if value == tonumber(item) then
+            return true
+        end
+    end
+
+    return false
+end
+
 ---@return number?
 function OxTask:getNextTime()
     if not self.isActive then return end
 
-    local day = getTimeUnit(self.day, 'day')
+    local now = os.time()
+    local startDate = os.date('*t', now) --[[@as Date]]
+    startDate.sec = 0
+    startDate.min = startDate.min + 1
+    startDate = os.date('*t', os.time(startDate)) --[[@as Date]]
 
-    if day == 0 then
-        day = getMaxDaysInMonth(currentDate.month)
-    end
+    for dayOffset = 0, 366 do
+        local candidate
 
-    if day ~= currentDate.day then return end
-
-    local month = getTimeUnit(self.month, 'month')
-    if month ~= currentDate.month then return end
-
-    local weekday = getTimeUnit(self.weekday, 'wday')
-    if weekday and weekday ~= currentDate.wday then return end
-
-    local minute = getTimeUnit(self.minute, 'min')
-    if not minute then return end
-
-    local hour = getTimeUnit(self.hour, 'hour')
-    if not hour then return end
-
-    if minute >= maxUnits.min then
-        if not self.hour then
-            hour += math.floor(minute / maxUnits.min)
+        if dayOffset == 0 then
+            candidate = startDate
+        else
+            local t = os.time({ year = startDate.year, month = startDate.month, day = startDate.day, hour = 12 }) + dayOffset * 86400
+            candidate = os.date('*t', t) --[[@as Date]]
         end
-        minute = minute % maxUnits.min
-    end
 
-    if hour >= maxUnits.hour and day then
-        if not self.day then
-            day += math.floor(hour / maxUnits.hour)
+        if matchesField(self.month, candidate.month)
+            and matchesField(self.day, candidate.day, candidate.month, candidate.year)
+            and matchesField(self.weekday, candidate.wday)
+        then
+            local startHour = (dayOffset == 0) and startDate.hour or 0
+
+            for h = startHour, 23 do
+                if matchesField(self.hour, h) then
+                    local startMin = (dayOffset == 0 and h == startDate.hour) and startDate.min or 0
+
+                    for m = startMin, 59 do
+                        if matchesField(self.minute, m) then
+                            local nextTime = os.time({
+                                year = candidate.year,
+                                month = candidate.month,
+                                day = candidate.day,
+                                hour = h,
+                                min = m,
+                                sec = 0,
+                            })
+
+                            if self.lastRun and nextTime - self.lastRun < 60 then
+                                if self.debug then
+                                    lib.print.debug(('Preventing duplicate execution of task %s - Last run: %s, Next scheduled: %s'):format(
+                                        self.id,
+                                        os.date('%c', self.lastRun),
+                                        os.date('%c', nextTime)
+                                    ))
+                                end
+                            else
+                                return nextTime
+                            end
+                        end
+                    end
+                end
+            end
         end
-        hour = hour % maxUnits.hour
     end
-
-    local nextTime = os.time({
-        min = minute,
-        hour = hour,
-        day = day or currentDate.day,
-        month = month or currentDate.month,
-        year = currentDate.year,
-    })
-
-    if self.lastRun and nextTime - self.lastRun < 60 then
-        if self.debug then
-            lib.print.debug(('Preventing duplicate execution of task %s - Last run: %s, Next scheduled: %s'):format(
-                self.id,
-                os.date('%c', self.lastRun),
-                os.date('%c', nextTime)
-            ))
-        end
-        return
-    end
-
-    return nextTime
 end
 
 ---@return number
