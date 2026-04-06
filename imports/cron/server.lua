@@ -356,6 +356,11 @@ function OxTask:stop(msg, internal)
     end
 end
 
+function OxTask:destroy()
+    self:stop()
+    tasks[self.id] = nil
+end
+
 ---@param expression string A cron expression such as `* * * * *` representing minute, hour, day, month, and day of the week.
 ---@param job fun(task: OxTask, date: osdate)
 ---@param options? { debug?: boolean }
@@ -390,8 +395,7 @@ end
 
 -- reschedule any dead tasks on a new day
 lib.cron.new('0 0 * * *', function()
-    for i = 1, #tasks do
-        local task = tasks[i]
+    for _, task in pairs(tasks) do
         if not task.isActive and not task.manualStop then
             task:run()
         end
