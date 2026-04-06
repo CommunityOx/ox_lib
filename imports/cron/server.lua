@@ -51,13 +51,6 @@ local validRanges = {
     wday = { min = 0, max = 7 },
 }
 
-local maxUnits = {
-    min = 60,
-    hour = 24,
-    wday = 7,
-    day = 31,
-    month = 12,
-}
 
 local weekdayMap = {
     sun = 1,
@@ -170,80 +163,6 @@ local function parseCron(value, unit)
     error(("^1invalid cron expression. '%s' is not supported for %s^0"):format(value, unit), 3)
 end
 
----@param value string|number|function|nil
----@param unit string
----@return number|false|nil
-local function getTimeUnit(value, unit)
-    local currentTime = currentDate[unit]
-
-    if not value then
-        return unit == 'min' and currentTime + 1 or currentTime
-    end
-
-    if type(value) == 'function' then
-        return value()
-    end
-
-    local unitMax = maxUnits[unit]
-
-    if type(value) == 'string' then
-        local stepValue = string.match(value, '*/(%d+)')
-
-        if stepValue then
-            local step = tonumber(stepValue)
-            for i = currentTime + 1, unitMax do
-                if i % step == 0 then return i end
-            end
-            return step + unitMax
-        end
-
-        local range = string.match(value, '%d+-%d+')
-        if range then
-            local min, max = string.strsplit('-', range)
-            min, max = tonumber(min, 10), tonumber(max, 10)
-
-            if unit == 'min' then
-                if currentTime >= max then
-                    return min + unitMax
-                end
-            elseif currentTime > max then
-                return min + unitMax
-            end
-
-            return currentTime < min and min or currentTime
-        end
-
-        local list = string.match(value, '%d+,%d+')
-        if list then
-            local values = {}
-            for listValue in string.gmatch(value, '%d+') do
-                values[#values + 1] = tonumber(listValue)
-            end
-            table.sort(values)
-
-            for i = 1, #values do
-                local listValue = values[i]
-                if unit == 'min' then
-                    if currentTime < listValue then
-                        return listValue
-                    end
-                elseif currentTime <= listValue then
-                    return listValue
-                end
-            end
-
-            return values[1] + unitMax
-        end
-
-        return false
-    end
-
-    if unit == 'min' then
-        return value <= currentTime and value + unitMax or value --[[@as number]]
-    end
-
-    return value < currentTime and value + unitMax or value --[[@as number]]
-end
 
 ---Checks if a given value matches a cron field specification.
 ---@param field number|string|function|nil
@@ -348,41 +267,7 @@ end
 
 ---@return number
 function OxTask:getAbsoluteNextTime()
-    local minute = getTimeUnit(self.minute, 'min')
-    local hour = getTimeUnit(self.hour, 'hour')
-    local day = getTimeUnit(self.day, 'day')
-    local month = getTimeUnit(self.month, 'month')
-    local year = getTimeUnit(self.year, 'year')
-
-    if self.day then
-        if currentDate.hour < hour or (currentDate.hour == hour and currentDate.min < minute) then
-            day = day - 1
-            if day < 1 then
-                day = getMaxDaysInMonth(currentDate.month)
-            end
-        end
-
-        if currentDate.hour > hour or (currentDate.hour == hour and currentDate.min >= minute) then
-            day = day + 1
-            if day > getMaxDaysInMonth(currentDate.month) or day == 1 then
-                day = 1
-                month = month + 1
-            end
-        end
-    end
-
-    ---@diagnostic disable-next-line: assign-type-mismatch
-    if os.time({ year = year, month = month, day = day, hour = hour, min = minute }) < os.time() then
-        year = year and year + 1 or currentDate.year + 1
-    end
-
-    return os.time({
-        min = minute < 60 and minute or 0,
-        hour = hour < 24 and hour or 0,
-        day = day or currentDate.day,
-        month = month or currentDate.month,
-        year = year or currentDate.year,
-    })
+    return self:getNextTime() or os.time()
 end
 
 function OxTask:getTimeAsString(timestamp)
