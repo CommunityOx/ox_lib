@@ -281,7 +281,7 @@ function OxTask:scheduleTask()
     local runAt = self:getNextTime()
 
     if not runAt then
-        return self:stop('getNextTime returned no value')
+        return self:stop('getNextTime returned no value', true)
     end
 
     local currentTime = os.time()
@@ -289,7 +289,7 @@ function OxTask:scheduleTask()
 
     if sleep < 0 then
         if not self.maxDelay or -sleep > self.maxDelay then
-            return self:stop(self.debug and ('scheduled time expired %s seconds ago'):format(-sleep))
+            return self:stop(self.debug and ('scheduled time expired %s seconds ago'):format(-sleep), true)
         end
 
         if self.debug then
@@ -336,14 +336,16 @@ function OxTask:run()
     if self.isActive then return end
 
     self.isActive = true
+    self.manualStop = false
 
     CreateThread(function()
         while self:scheduleTask() do end
     end)
 end
 
-function OxTask:stop(msg)
+function OxTask:stop(msg, internal)
     self.isActive = false
+    self.manualStop = not internal
 
     if self.debug then
         if msg then
@@ -390,7 +392,7 @@ end
 lib.cron.new('0 0 * * *', function()
     for i = 1, #tasks do
         local task = tasks[i]
-        if not task.isActive then
+        if not task.isActive and not task.manualStop then
             task:run()
         end
     end
