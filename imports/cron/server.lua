@@ -276,6 +276,7 @@ end
 
 ---@type OxTask[]
 local tasks = {}
+local nextTaskId = 0
 
 function OxTask:scheduleTask()
     local runAt = self:getNextTime()
@@ -383,7 +384,8 @@ function lib.cron.new(expression, job, options)
     task.day = parseCron(day, 'day')
     task.month = parseCron(month, 'month')
     task.weekday = parseCron(weekday, 'wday')
-    task.id = #tasks + 1
+    nextTaskId = nextTaskId + 1
+    task.id = nextTaskId
     task.job = job
     task.lastRun = nil
     task.maxDelay = task.maxDelay or 1
