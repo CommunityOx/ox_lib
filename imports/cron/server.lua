@@ -73,7 +73,7 @@ local monthMap = {
 ---@param year? number
 ---@return number
 local function getMaxDaysInMonth(month, year)
-    return os.date('*t', os.time({ year = year or currentDate.year, month = month + 1, day = -1 })).day --[[@as number]]
+    return os.date('*t', os.time({ year = year or currentDate.year, month = month + 1, day = 0 })).day --[[@as number]]
 end
 
 ---@param value string|number
