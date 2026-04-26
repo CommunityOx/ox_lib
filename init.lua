@@ -297,3 +297,9 @@ for i = 1, GetNumResourceMetadata(cache.resource, 'ox_lib') do
         if type(module) == 'function' then pcall(module) end
     end
 end
+
+-- Auto-load lib.test (server-only) when the resource declares any `ox_test_dir`
+-- entries — registers the runOxTests export so /oxtest can invoke it.
+if context == 'server' and GetNumResourceMetadata(cache.resource, 'ox_test_dir') > 0 then
+    loadModule(lib, 'test')
+end

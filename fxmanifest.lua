@@ -43,6 +43,7 @@ client_scripts {
 server_scripts {
     'imports/callback/server.lua',
     'imports/getFilesInDirectory/server.lua',
+    'imports/test/server.lua',
     'resource/**/server.lua',
     'resource/**/server/*.lua',
 }
