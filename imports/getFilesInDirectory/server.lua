@@ -6,11 +6,15 @@
     Copyright © 2025 Linden <https://github.com/thelindat>
 ]]
 
----@param path string
----@param pattern string
----@return table string[]
+---List files in a directory inside a resource. Returns paths relative to
+---`path` so each entry can be appended back to it for further use.
+---
+---@param path string  resource-relative path, optionally `@resource/subdir` for cross-resource
+---@param pattern string  Lua pattern matched against each returned path
+---@param recursive? boolean  walk subdirectories (default false)
+---@return string[] files
 ---@return integer fileCount
-function lib.getFilesInDirectory(path, pattern)
+function lib.getFilesInDirectory(path, pattern, recursive)
     local resource = cache.resource
 
     if path:find('^@') then
@@ -18,28 +22,58 @@ function lib.getFilesInDirectory(path, pattern)
         path = path:sub(#resource + 3)
     end
 
-    local files = {}
-    local fileCount = 0
-    local windows = string.match(os.getenv('OS') or '', 'Windows')
-    local command = ('%s%s%s'):format(
-        windows and 'dir "' or 'ls "',
-        (GetResourcePath(resource):gsub('//', '/') .. '/' .. path):gsub('\\', '/'),
-        windows and '/" /b' or '/"'
-    )
+    -- os.getenv('OS') isn't reliable across all FXServer environments. The
+    -- resource path itself tells us: drive letter or backslash means Windows.
+    local rawPath = GetResourcePath(resource)
+    local windows = rawPath:find('\\', 1, true) ~= nil or rawPath:match('^%a:') ~= nil
+    local resourcePath = rawPath:gsub('\\', '/'):gsub('//', '/')
+    local relRoot = path:gsub('\\', '/'):gsub('/$', ''):gsub('^/', '')
+    local fullDir = ('%s/%s'):format(resourcePath, relRoot):gsub('//', '/'):gsub('/$', '')
 
-    local dir = io.popen(command)
-
-    if dir then
-        for line in dir:lines() do
-            if line:match(pattern) then
-                fileCount += 1
-                files[fileCount] = line
-            end
+    local cmd
+    if recursive then
+        if windows then
+            cmd = ('dir "%s" /b /s /a-d 2>&1'):format(fullDir:gsub('/', '\\'))
+        else
+            cmd = ('find "%s" -type f 2>&1'):format(fullDir)
         end
-
-        dir:close()
+    else
+        if windows then
+            cmd = ('dir "%s" /b 2>&1'):format(fullDir:gsub('/', '\\'))
+        else
+            cmd = ('ls "%s" 2>&1'):format(fullDir)
+        end
     end
 
+    local pipe = io.popen(cmd)
+    if not pipe then return {}, 0 end
+
+    local files = {}
+    local fileCount = 0
+    local prefix = fullDir .. '/'
+
+    for line in pipe:lines() do
+        -- Windows io.popen leaves trailing \r, which breaks end-of-string patterns.
+        line = line:gsub('[\r\n]+$', '')
+        if line ~= '' and line ~= '.' and line ~= '..' then
+            local normalized = line:gsub('\\', '/')
+            -- Some shells return full paths (Windows `dir /s`, unix `find`),
+            -- others return bare filenames. Slash presence tells us which.
+            local rel
+            if normalized:find('/', 1, true) then
+                rel = normalized:sub(#prefix + 1)
+                if rel:sub(1, 1) == '/' then rel = rel:sub(2) end
+            else
+                rel = normalized
+            end
+            if rel ~= '' and rel:match(pattern) then
+                fileCount = fileCount + 1
+                files[fileCount] = rel
+            end
+        end
+    end
+
+    pipe:close()
     return files, fileCount
 end
 
