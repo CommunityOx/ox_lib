@@ -14,7 +14,7 @@
 ---@return vector3? playerCoords
 function lib.getClosestPlayer(coords, maxDistance, includePlayer)
 	local players = GetActivePlayers()
-	local closestId, closestPed, closestCoords
+	local closestId, closestPed, closestCoords, closestVehicle
 	maxDistance = maxDistance or 2.0
 
 	for i = 1, #players do
@@ -24,9 +24,8 @@ function lib.getClosestPlayer(coords, maxDistance, includePlayer)
 			local playerPed = GetPlayerPed(playerId)
 			local playerCoords = GetEntityCoords(playerPed)
 
-            if GetVehiclePedIsIn(playerPed, false) ~= 0 then
-				playerCoords=GetWorldPositionOfEntityBone(playerPed, 0)
-			end 
+            local vehicle = GetVehiclePedIsIn(playerPed, false)
+            local playerCoords = vehicle == 0 and GetEntityCoords(playerPed) or GetWorldPositionOfEntityBone(playerPed, 0)
             
 			local distance = #(coords - playerCoords)
 
@@ -35,11 +34,12 @@ function lib.getClosestPlayer(coords, maxDistance, includePlayer)
 				closestId = playerId
 				closestPed = playerPed
 				closestCoords = playerCoords
+                closestVehicle = vehicle
 			end
 		end
 	end
 
-	return closestId, closestPed, closestCoords
+	return closestId, closestPed, closestCoords, closestVehicle
 end
 
 return lib.getClosestPlayer
